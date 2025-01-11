@@ -5,7 +5,7 @@ public class LightsConstants {
     public static enum LightStatesEnum {
         kIdle,
         kDriving,
-        kScoring,
+        kActing,
         kHasCoral,
         kIntaking,
         kHasAlgae,
@@ -15,7 +15,7 @@ public class LightsConstants {
     public static final Map<LightStatesEnum, Double> LightStates = Map.of(
         LightStatesEnum.kIdle, -0.95, // rainbow ocean
         LightStatesEnum.kDriving, 0.91, // purple
-        LightStatesEnum.kScoring, 0.63, // red orange
+        LightStatesEnum.kActing, 0.63, // red orange
         LightStatesEnum.kHasCoral, 0.81, // aqua
         LightStatesEnum.kHasAlgae, 0.73, // lime
         LightStatesEnum.kHasBoth, -0.93 // rainbow lava

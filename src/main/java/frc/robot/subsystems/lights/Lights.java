@@ -11,7 +11,7 @@ public class Lights extends SubsystemBase {
     private final LightsIO io;
     private final LightsIOInputsAutoLogged inputs;
     private final Alert disconnectedAlert;
-    private final LightsSupplier lightsSuppliers[]; // Assumed that coral intake sensor is 1st, algae intake sensor is 2nd
+    private final LightsSupplier lightsSuppliers[]; // Assumed that coral intake sensor is 1st, algae intake sensor is 2nd, acting is 3rd
     private final boolean areSensorsEnabled[];
 
     public Lights(LightsIO io, LightsSupplier... supplier) {
@@ -33,7 +33,7 @@ public class Lights extends SubsystemBase {
 
         // poll whether these are enabled
         for (int i = 0; i < lightsSuppliers.length; i++) {
-            areSensorsEnabled[i] = lightsSuppliers[i].getSensor();
+            areSensorsEnabled[i] = lightsSuppliers[i].getStatus();
         }
 
         if (areSensorsEnabled[0] && areSensorsEnabled[1]) { // if robot has both algae and coral
@@ -43,18 +43,20 @@ public class Lights extends SubsystemBase {
         } else if (areSensorsEnabled[0] && !areSensorsEnabled[1]) { // if robot has coral and not algae
             io.setLED(LightStatesEnum.kHasCoral);
         } else { // if robot has neither algae nor coral
-            if (DriverStation.isEnabled()) { // if robot is enabled we assume it's driving
-                io.setLED(LightStatesEnum.kDriving);
+            if (DriverStation.isEnabled()) { // if robot is enabled
+                if (areSensorsEnabled[3]) { // if the robot is acting (intaking or scoring)
+                    io.setLED(LightStatesEnum.kActing);
+                } else { // if the robot is not acting (driving)
+                    io.setLED(LightStatesEnum.kDriving);
+                }
             } else { // if its not enabled, we assume its disabled and idle
                 io.setLED(LightStatesEnum.kIdle);
             }
         }
-
-
     }
 
     @FunctionalInterface
     public static interface LightsSupplier {
-        public boolean getSensor();
+        public boolean getStatus();
     }
 }
