@@ -19,10 +19,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.TorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -63,13 +60,6 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final VoltageOut voltageRequest = new VoltageOut(0);
   private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
   private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
-
-  // Torque-current control requests
-  private final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
-  private final PositionTorqueCurrentFOC positionTorqueCurrentRequest =
-      new PositionTorqueCurrentFOC(0.0);
-  private final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest =
-      new VelocityTorqueCurrentFOC(0.0);
 
   // Timestamp inputs from Phoenix thread
   private final Queue<Double> timestampQueue;
@@ -228,39 +218,22 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveOpenLoop(double output) {
-    driveTalon.setControl(
-        switch (constants.DriveMotorClosedLoopOutput) {
-          case Voltage -> voltageRequest.withOutput(output);
-          case TorqueCurrentFOC -> torqueCurrentRequest.withOutput(output);
-        });
+    driveTalon.setControl(voltageRequest.withOutput(output));
   }
 
   @Override
   public void setTurnOpenLoop(double output) {
-    turnTalon.setControl(
-        switch (constants.SteerMotorClosedLoopOutput) {
-          case Voltage -> voltageRequest.withOutput(output);
-          case TorqueCurrentFOC -> torqueCurrentRequest.withOutput(output);
-        });
+    turnTalon.setControl(voltageRequest.withOutput(output));
   }
 
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
-    driveTalon.setControl(
-        switch (constants.DriveMotorClosedLoopOutput) {
-          case Voltage -> velocityVoltageRequest.withVelocity(velocityRotPerSec);
-          case TorqueCurrentFOC -> velocityTorqueCurrentRequest.withVelocity(velocityRotPerSec);
-        });
+    driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
   }
 
   @Override
   public void setTurnPosition(Rotation2d rotation) {
-    turnTalon.setControl(
-        switch (constants.SteerMotorClosedLoopOutput) {
-          case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations());
-          case TorqueCurrentFOC -> positionTorqueCurrentRequest.withPosition(
-              rotation.getRotations());
-        });
+    turnTalon.setControl(positionVoltageRequest.withPosition(rotation.getRotations()));
   }
 }

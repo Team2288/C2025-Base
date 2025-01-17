@@ -5,7 +5,6 @@ import org.littletonrobotics.junction.AutoLog;
 public interface LightsIO {
     @AutoLog
     public static class LightsIOInputs {
-        public boolean connected = false;
         public LightStatesEnum currentState = LightStatesEnum.kIdle;
     }
 

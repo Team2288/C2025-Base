@@ -30,6 +30,8 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.lights.Lights;
+import frc.robot.subsystems.lights.LightsIOAddressable;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
@@ -45,6 +47,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+  private final Lights lights;
 
   // Controller
   // private final CommandJoystick controller = new CommandJoystick(0);
@@ -59,16 +62,18 @@ public class RobotContainer {
       case REAL:
         // Real robot, instantiate hardware IO implementations
         drive =
-            new Drive(
-                new GyroIOPigeon2(),
-                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                new ModuleIOTalonFX(TunerConstants.BackRight));
+            new Drive(new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
+               // new GyroIOPigeon2(),
+                //new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                //new ModuleIOTalonFX(TunerConstants.FrontRight),
+                //new ModuleIOTalonFX(TunerConstants.BackLeft),
+                //new ModuleIOTalonFX(TunerConstants.BackRight));
 
         vision =
             new Vision(
-                drive::addVisionMeasurement, new VisionIOLimelight("ironman", drive::getRotation));
+                drive::addVisionMeasurement, new VisionIO() {}); //new VisionIOLimelight("ironman", drive::getRotation));
+        lights = 
+            new Lights(new LightsIOAddressable());
 
         break;
 
@@ -86,6 +91,8 @@ public class RobotContainer {
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
 
+        lights = new Lights(new LightsIOAddressable());
+
         break;
 
       default:
@@ -99,6 +106,8 @@ public class RobotContainer {
                 new ModuleIO() {});
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
+
+        lights = new Lights(new LightsIOAddressable());
 
         break;
     }

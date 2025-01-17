@@ -2,7 +2,6 @@ package frc.robot.subsystems.elevator;
 
 import org.littletonrobotics.junction.AutoLog;
 
-import frc.robot.subsystems.drive.ModuleIO.ModuleIOInputs;
 
 public interface ElevatorIO {
     @AutoLog
@@ -20,7 +19,7 @@ public interface ElevatorIO {
         public double followerCurrentAmps = 0.0;
     }
 
-    public default void updateInputs(ModuleIOInputs inputs) {}
+    public default void updateInputs(ElevatorIOInputs inputs) {}
 
     public default void setPosition(double position) {}
 

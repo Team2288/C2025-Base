@@ -26,6 +26,7 @@ public class Module {
   private final ModuleIO io;
   private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
   private final int index;
+  @SuppressWarnings("rawtypes")
   private final SwerveModuleConstants constants;
 
   private final Alert driveDisconnectedAlert;
