@@ -10,5 +10,7 @@ public interface LightsIO {
 
     public default void updateInputs(LightsIOInputs inputs) {}
 
-    public default void setLED(LightStatesEnum state) {}
+    public default void setLEDPattern(LightStatesEnum state, boolean isFlashing) {}
+
+    public default void setLEDData() {}
 }
