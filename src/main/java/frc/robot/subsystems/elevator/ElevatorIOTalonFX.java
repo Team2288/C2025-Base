@@ -1,26 +1,29 @@
 package frc.robot.subsystems.elevator;
 
-import static frc.robot.util.PhoenixUtil.*;
+import static frc.robot.util.PhoenixUtil.tryUntilOk;
 
-import edu.wpi.first.math.util.Units;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.ParentDevice;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.math.filter.Debouncer;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.hardware.ParentDevice;
+import edu.wpi.first.units.measure.Voltage;
 
 public class ElevatorIOTalonFX implements ElevatorIO {
     TalonFX krakenLeader;
     TalonFX krakenFollower;
     
     private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
+    private final MotionMagicVoltage motionVoltageRequest = new MotionMagicVoltage(0.0);
 
     // Inputs from leader motor
     private final StatusSignal<Angle> leaderPosition;
@@ -49,6 +52,10 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         elevatorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         elevatorConfig.Slot0 = ElevatorConstants.elevatorGains;
         elevatorConfig.Feedback.SensorToMechanismRatio = ElevatorConstants.kElevatorGearRatio;
+
+        elevatorConfig.MotionMagic.MotionMagicCruiseVelocity = 80;
+        elevatorConfig.MotionMagic.MotionMagicAcceleration = 400;
+        elevatorConfig.MotionMagic.MotionMagicJerk = 4000;
 
         tryUntilOk(5, () -> krakenLeader.getConfigurator().apply(elevatorConfig, 0.25));
         tryUntilOk(5, () -> krakenLeader.setPosition(0.0, 0.25));
@@ -104,7 +111,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
     @Override
-    public void setPosition(double position) {
+    public void setPositionMotionMagic(double position) {
+        krakenLeader.setControl(motionVoltageRequest.withPosition(position));
+    }
+
+    @Override
+    public void setPositionVoltage(double position) {
         krakenLeader.setControl(positionVoltageRequest.withPosition(position));
     }
 }

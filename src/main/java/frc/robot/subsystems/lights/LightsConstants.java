@@ -36,11 +36,11 @@ public class LightsConstants {
                                     Color.kOrange,
                                     Color.kDarkRed
                                     ).scrollAtAbsoluteSpeed(MetersPerSecond.of(.3), Meters.of(1/60.0)), // orange to red gradient
-        LightStatesEnum.kHasCoral, LEDPattern.solid(Color.kCoral), // coral
+        LightStatesEnum.kHasCoral, LEDPattern.solid(Color.kYellow), // coral
         LightStatesEnum.kHasAlgae, LEDPattern.solid(Color.kLime), // lime
         LightStatesEnum.kHasBoth, LEDPattern.gradient(
                                     GradientType.kContinuous,
-                                    Color.kAzure,
+                                    Color.kYellow,
                                     Color.kLime
                                     ).scrollAtAbsoluteSpeed(MetersPerSecond.of(.3), Meters.of(1/60.0)) // azure to lime gradient
     );

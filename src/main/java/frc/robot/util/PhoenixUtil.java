@@ -13,8 +13,9 @@
 
 package frc.robot.util;
 
-import com.ctre.phoenix6.StatusCode;
 import java.util.function.Supplier;
+
+import com.ctre.phoenix6.StatusCode;
 
 public class PhoenixUtil {
   /** Attempts to run the command until no error is produced. */
@@ -23,5 +24,9 @@ public class PhoenixUtil {
       var error = command.get();
       if (error.isOK()) break;
     }
+  }
+  
+  public static boolean epsilonEquals(double a, double b, double epsilon) {
+    return (a - epsilon <= b) && (a + epsilon >= b);
   }
 }

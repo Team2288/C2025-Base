@@ -1,7 +1,6 @@
 package frc.robot.subsystems.lights;
 import static edu.wpi.first.units.Units.Seconds;
 
-
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
@@ -47,4 +46,3 @@ public class LightsIOAddressable implements LightsIO {
         this.usingState = state;
     }
 }
-  

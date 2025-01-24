@@ -8,13 +8,13 @@ import frc.robot.subsystems.lights.LightsConstants.LightStatesEnum;
 
 public class Lights extends SubsystemBase {
     private final LightsIO io;
-    private final LightsIOInputsAutoLogged inputs;
+    private final LightsIOInputsAutoLogged inputs = new LightsIOInputsAutoLogged();
     private final LightsSupplier lightsSuppliers[]; // Assumed that coral intake sensor is 1st, algae intake sensor is 2nd, acting is 3rd
     private boolean areSensorsEnabled[];
+    
 
     public Lights(LightsIO io, LightsSupplier... supplier) {
         this.io = io;
-        this.inputs = new LightsIOInputsAutoLogged();
         this.lightsSuppliers = new LightsSupplier[supplier.length+1];
         this.areSensorsEnabled = new boolean[supplier.length+1];
 
@@ -60,7 +60,7 @@ public class Lights extends SubsystemBase {
 
         try {
             boolean hasAlgae = areSensorsEnabled[2];
-            boolean hasCoral =  areSensorsEnabled[3];//areSensorsEnabled[1];
+            boolean hasCoral =  areSensorsEnabled[1];
 
             if (hasCoral && hasAlgae) { 
                 usingState = LightStatesEnum.kHasBoth;
