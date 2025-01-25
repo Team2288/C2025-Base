@@ -29,6 +29,7 @@ public class Elevator extends SubsystemBase {
         this.currState = ElevatorState.IDLING;
         this.elevatorGoal = 0.0;
 
+        this.io.resetEncoder(0.0);
         setDefaultCommand(setElevatorPosition(0.0));
     }
 
@@ -44,6 +45,7 @@ public class Elevator extends SubsystemBase {
                 else this.currState = ElevatorState.RETRACTING;
 
                 this.elevatorGoal = position;
+                Logger.recordOutput("Elevator/Setpoint", elevatorGoal);
             },
             () -> io.setPositionMotionMagic(position),
             interrupted -> {
@@ -52,6 +54,12 @@ public class Elevator extends SubsystemBase {
             () -> PhoenixUtil.epsilonEquals(inputs.leaderPosition, position, 10),
             this
         );
+    }
+
+    public Command currentZero() {
+        return run(() -> io.setVoltage(-1.0))
+               .until(() -> inputs.leaderCurrentAmps > 40.0)
+               .finallyDo(() -> io.resetEncoder(0.0));
     }
 
     @Override
@@ -63,7 +71,6 @@ public class Elevator extends SubsystemBase {
 
         Logger.processInputs("Elevator/", inputs);
         Logger.recordOutput("Elevator/ElevatorState", currState);
-        Logger.recordOutput("Elevator/ElevatorGoal", elevatorGoal);
     }
 
 }

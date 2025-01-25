@@ -13,13 +13,18 @@
 
 package frc.robot.subsystems.drive;
 
-import static frc.robot.util.PhoenixUtil.*;
+import static frc.robot.util.PhoenixUtil.tryUntilOk;
+
+import java.util.Queue;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -30,6 +35,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -38,7 +44,6 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import frc.robot.generated.TunerConstants;
-import java.util.Queue;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -60,6 +65,13 @@ public class ModuleIOTalonFX implements ModuleIO {
   private final VoltageOut voltageRequest = new VoltageOut(0);
   private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
   private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0.0);
+
+  // Torque-current control requests
+  private final TorqueCurrentFOC torqueCurrentRequest = new TorqueCurrentFOC(0);
+  private final PositionTorqueCurrentFOC positionTorqueCurrentRequest =
+      new PositionTorqueCurrentFOC(0.0);
+  private final VelocityTorqueCurrentFOC velocityTorqueCurrentRequest =
+      new VelocityTorqueCurrentFOC(0.0);
 
   // Timestamp inputs from Phoenix thread
   private final Queue<Double> timestampQueue;
@@ -113,12 +125,7 @@ public class ModuleIOTalonFX implements ModuleIO {
     turnConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     turnConfig.Slot0 = constants.SteerMotorGains;
     turnConfig.Feedback.FeedbackRemoteSensorID = constants.EncoderId;
-    turnConfig.Feedback.FeedbackSensorSource =
-        switch (constants.FeedbackSource) {
-          case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
-          case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
-          case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;
-        };
+    turnConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
     turnConfig.Feedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
     turnConfig.MotionMagic.MotionMagicAcceleration =
@@ -218,22 +225,22 @@ public class ModuleIOTalonFX implements ModuleIO {
 
   @Override
   public void setDriveOpenLoop(double output) {
-    driveTalon.setControl(voltageRequest.withOutput(output));
+    driveTalon.setControl(torqueCurrentRequest.withOutput(output));
   }
 
   @Override
   public void setTurnOpenLoop(double output) {
-    turnTalon.setControl(voltageRequest.withOutput(output));
+    turnTalon.setControl(torqueCurrentRequest.withOutput(output));
   }
 
   @Override
   public void setDriveVelocity(double velocityRadPerSec) {
     double velocityRotPerSec = Units.radiansToRotations(velocityRadPerSec);
-    driveTalon.setControl(velocityVoltageRequest.withVelocity(velocityRotPerSec));
+    driveTalon.setControl(velocityTorqueCurrentRequest.withVelocity(velocityRotPerSec));
   }
 
   @Override
   public void setTurnPosition(Rotation2d rotation) {
-    turnTalon.setControl(positionVoltageRequest.withPosition(rotation.getRotations()));
+    turnTalon.setControl(positionTorqueCurrentRequest.withPosition(rotation.getRotations()));
   }
 }

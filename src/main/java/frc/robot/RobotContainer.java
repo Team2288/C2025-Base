@@ -62,12 +62,12 @@ public class RobotContainer {
       case REAL:
         // Real robot, instantiate hardware IO implementations
         drive =
-            new Drive(new GyroIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {}, new ModuleIO() {});
-               // new GyroIOPigeon2(),
-                //new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                //new ModuleIOTalonFX(TunerConstants.FrontRight),
-                //new ModuleIOTalonFX(TunerConstants.BackLeft),
-                //new ModuleIOTalonFX(TunerConstants.BackRight));
+            new Drive(
+                new GyroIOPigeon2(),
+                new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                new ModuleIOTalonFX(TunerConstants.FrontRight),
+                new ModuleIOTalonFX(TunerConstants.BackLeft),
+                new ModuleIOTalonFX(TunerConstants.BackRight));
 
         vision =
             new Vision(

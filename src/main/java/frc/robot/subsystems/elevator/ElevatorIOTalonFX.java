@@ -6,9 +6,10 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.filter.Debouncer;
@@ -22,8 +23,8 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     TalonFX krakenLeader;
     TalonFX krakenFollower;
     
-    private final PositionVoltage positionVoltageRequest = new PositionVoltage(0.0);
-    private final MotionMagicVoltage motionVoltageRequest = new MotionMagicVoltage(0.0);
+    private final VoltageOut voltageRequest = new VoltageOut(0.0).withEnableFOC(true);
+    private final MotionMagicVoltage motionVoltageRequest = new MotionMagicVoltage(0.0).withEnableFOC(true);
 
     // Inputs from leader motor
     private final StatusSignal<Angle> leaderPosition;
@@ -116,7 +117,12 @@ public class ElevatorIOTalonFX implements ElevatorIO {
     }
 
     @Override
-    public void setPositionVoltage(double position) {
-        krakenLeader.setControl(positionVoltageRequest.withPosition(position));
+    public void resetEncoder(double position) {
+        krakenLeader.setPosition(position);
+    }
+
+    @Override
+    public void setVoltage(double volts) {
+        krakenLeader.setControl(voltageRequest.withOutput(volts));
     }
 }
