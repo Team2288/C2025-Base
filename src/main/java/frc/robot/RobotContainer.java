@@ -35,6 +35,9 @@ import frc.robot.subsystems.lights.LightsIOAddressable;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -47,6 +50,7 @@ public class RobotContainer {
   // Subsystems
   private final Drive drive;
   private final Vision vision;
+  private final Elevator elevator;
   private final Lights lights;
 
   // Controller
@@ -75,6 +79,9 @@ public class RobotContainer {
         lights = 
             new Lights(new LightsIOAddressable());
 
+        elevator = 
+            new Elevator(new ElevatorIOTalonFX());
+
         break;
 
       case SIM:
@@ -93,6 +100,8 @@ public class RobotContainer {
 
         lights = new Lights(new LightsIOAddressable());
 
+        elevator = new Elevator(new ElevatorIO() {});
+
         break;
 
       default:
@@ -108,6 +117,8 @@ public class RobotContainer {
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
 
         lights = new Lights(new LightsIOAddressable());
+
+        elevator = new Elevator(new ElevatorIO() {});
 
         break;
     }

@@ -13,14 +13,16 @@
 
 package frc.robot.subsystems.drive;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
-import org.littletonrobotics.junction.Logger;
 
 public class Module {
   private final ModuleIO io;
@@ -83,10 +85,22 @@ public class Module {
   }
 
   /** Runs the module with the specified output while controlling to zero degrees. */
+  
   public void runCharacterization(double output) {
     io.setDriveOpenLoop(output);
     io.setTurnPosition(new Rotation2d());
   }
+  
+
+  /** Runs the turn modules with the specified output */
+
+  /* 
+  public void runCharacterization(double output) {
+    io.setDriveOpenLoop(0.0);
+    io.setTurnOpenLoop(output);
+  }
+    */
+
 
   /** Disables all outputs to motors. */
   public void stop() {

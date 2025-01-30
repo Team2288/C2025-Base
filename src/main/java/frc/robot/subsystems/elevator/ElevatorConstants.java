@@ -19,7 +19,7 @@ public class ElevatorConstants {
                 .withStatorCurrentLimitEnable(true)
         );
 
-    public static final double kElevatorGearRatio = 6.122448979591837;
-    public static final int kKrakenLeaderPort = 50;
-    public static final int kKrakenFollowerPort = 51;
+    public static final double kElevatorGearRatio = 9;
+    public static final int kKrakenLeaderPort = 16;
+    public static final int kKrakenFollowerPort = 19;
 }
