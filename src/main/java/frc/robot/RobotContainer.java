@@ -178,7 +178,7 @@ public class RobotContainer {
 
     controller
         .button(4)
-        .onTrue(elevator.currentZero());
+        .onTrue(elevator.fastZero());
 
 
     // Lock to 0° when A button is held

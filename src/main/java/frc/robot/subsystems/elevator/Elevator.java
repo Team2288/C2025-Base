@@ -76,6 +76,11 @@ public class Elevator extends SubsystemBase {
         );
     }
 
+    public Command fastZero() {
+        return setElevatorPosition(0.0)
+               .andThen(currentZero());
+    }
+
     public Command currentZero() {
         return this.run(() -> io.setVoltage(-1.0))
                .until(() -> inputs.leaderCurrentAmps > 40.0)
