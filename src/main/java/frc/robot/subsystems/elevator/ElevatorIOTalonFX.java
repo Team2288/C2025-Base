@@ -46,7 +46,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         krakenLeader = new TalonFX(ElevatorConstants.kKrakenLeaderPort);
         krakenFollower = new TalonFX(ElevatorConstants.kKrakenFollowerPort);
 
-        krakenFollower.setControl(new Follower(ElevatorConstants.kKrakenLeaderPort, false));
+        krakenFollower.setControl(new Follower(ElevatorConstants.kKrakenLeaderPort, true));
         
         var elevatorConfig = ElevatorConstants.elevatorConfiguration;
 
@@ -56,7 +56,7 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
         elevatorConfig.MotionMagic.MotionMagicCruiseVelocity = 80;
         elevatorConfig.MotionMagic.MotionMagicAcceleration = 400;
-        elevatorConfig.MotionMagic.MotionMagicJerk = 4000;
+        elevatorConfig.MotionMagic.MotionMagicJerk = 0;
 
         tryUntilOk(5, () -> krakenLeader.getConfigurator().apply(elevatorConfig, 0.25));
         tryUntilOk(5, () -> krakenLeader.setPosition(0.0, 0.25));
@@ -102,17 +102,17 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         inputs.leaderAppliedVolts = leaderAppliedVolts.getValueAsDouble();
         inputs.leaderCurrentAmps = leaderCurrent.getValueAsDouble();
 
+
         // Update follower inputs
         inputs.followerConnected = followerConnectedDebounce.calculate(followerStatus.isOK());
         inputs.followerPosition = followerPosition.getValueAsDouble();
         inputs.followerVelocityRadPerSec = Units.rotationsToRadians(followerVelocity.getValueAsDouble());
         inputs.followerAppliedVolts = followerAppliedVolts.getValueAsDouble();
         inputs.followerCurrentAmps = followerCurrent.getValueAsDouble();
-
     }
 
     @Override
-    public void setPositionMotionMagic(double position) {
+    public void setPosition(double position) {
         krakenLeader.setControl(motionVoltageRequest.withPosition(position));
     }
 

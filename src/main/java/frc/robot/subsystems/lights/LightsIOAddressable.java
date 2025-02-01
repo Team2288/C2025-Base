@@ -14,7 +14,9 @@ public class LightsIOAddressable implements LightsIO {
 
     public LightsIOAddressable() {
         this.lights = new AddressableLED(LightsConstants.kPWMPort);
+
         this.buffer = new AddressableLEDBuffer(66);
+
         this.usingState = null;
 
         this.lights.setLength(buffer.getLength());

@@ -73,6 +73,10 @@ public class Lights extends SubsystemBase {
             Logger.recordOutput("Lights/Error", "Sensors down for coral/algae intakes");
         }
 
+        if (DriverStation.isEStopped()) {
+            usingState = LightStatesEnum.kStopped;
+        }
+
         if (inputs.currentState != usingState) {
             runPattern(usingState).schedule();
         }

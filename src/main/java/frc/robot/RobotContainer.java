@@ -14,13 +14,12 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import com.ctre.phoenix6.SignalLogger;
+import frc.robot.subsystems.elevator.ElevatorConstants;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -141,6 +140,8 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    
+    SignalLogger.setPath("/home/lvuser/logs/");
 
     // Configure the button bindings
     configureButtonBindings();
@@ -160,6 +161,25 @@ public class RobotContainer {
             () -> -controller.getY(),
             () -> -controller.getX(),
             () -> -controller.getZ()));
+
+        
+
+    controller
+        .button(1)
+        .onTrue(elevator.setElevatorPosition(2));
+
+    controller
+        .button(2)
+        .onTrue(elevator.setElevatorPosition(3));
+
+    controller
+        .button(3)
+        .onTrue(elevator.setElevatorPosition(4));
+
+    controller
+        .button(4)
+        .onTrue(elevator.currentZero());
+
 
     // Lock to 0° when A button is held
     /* 

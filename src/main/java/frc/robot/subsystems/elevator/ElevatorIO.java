@@ -25,5 +25,5 @@ public interface ElevatorIO {
 
     public default void setVoltage(double volts) {}
 
-    public default void setPositionMotionMagic(double position) {}
+    public default void setPosition(double position) {}
 }

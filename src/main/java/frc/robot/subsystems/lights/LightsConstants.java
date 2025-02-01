@@ -18,7 +18,8 @@ public class LightsConstants {
         kHasCoral,
         kIntaking,
         kHasAlgae,
-        kHasBoth
+        kHasBoth,
+        kStopped
     }
 
     public static Map<LightStatesEnum, LEDPattern> LightStates = Map.of(
@@ -42,8 +43,10 @@ public class LightsConstants {
                                     GradientType.kContinuous,
                                     Color.kYellow,
                                     Color.kLime
-                                    ).scrollAtAbsoluteSpeed(MetersPerSecond.of(.3), Meters.of(1/60.0)) // azure to lime gradient
+                                    ).scrollAtAbsoluteSpeed(MetersPerSecond.of(.3), Meters.of(1/60.0)), // azure to lime gradient
+        LightStatesEnum.kStopped, LEDPattern.solid(Color.kRed)
     );
 
     public static final int kPWMPort = 1;
+    public static final int kPWMPort2 = 6;
 }
