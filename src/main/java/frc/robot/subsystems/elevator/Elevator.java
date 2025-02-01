@@ -77,9 +77,12 @@ public class Elevator extends SubsystemBase {
     }
 
     public Command currentZero() {
-        return this.run(() -> this.io.setVoltage(-1.0))
-               .until(() -> this.inputs.leaderCurrentAmps > 40.0)
-               .finallyDo(() -> this.io.resetEncoder(0.0));
+        return this.run(() -> io.setVoltage(-1.0))
+               .until(() -> inputs.leaderCurrentAmps > 40.0)
+               .finallyDo(() -> {
+                    io.resetEncoder(0.0);
+                    io.setVoltage(0.0);
+               });
     }
 
     public Command sysIDCharacterize() {
