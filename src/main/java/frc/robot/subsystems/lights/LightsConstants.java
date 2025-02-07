@@ -47,6 +47,5 @@ public class LightsConstants {
         LightStatesEnum.kStopped, LEDPattern.solid(Color.kRed)
     );
 
-    public static final int kPWMPort = 1;
-    public static final int kPWMPort2 = 6;
+    public static final int kPWMPort = 0;
 }
