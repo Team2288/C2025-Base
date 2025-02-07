@@ -46,7 +46,6 @@ public class Intake extends SubsystemBase {
         setDefaultCommand(setIntakePositionAndVelocity(0.0, 0.0));
     }
 
-
     public Command setIntakePositionAndVelocity(double position, double velocityRotPerSec) {
         return setIntakePosition(position)
                .alongWith(setIntakeVelocity(velocityRotPerSec));
