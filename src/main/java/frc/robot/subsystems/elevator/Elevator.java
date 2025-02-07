@@ -43,14 +43,13 @@ public class Elevator extends SubsystemBase {
                     null, // Default ramp rate is acceptable
                     Volts.of(4),
                     null, // Default timeout is acceptable
-                    // Log state with Phoenix SignalLogger class
                     (state) -> SignalLogger.writeString("state", state.toString())),
                 new SysIdRoutine.Mechanism(
                     volts -> io.setVoltage(volts.in(Volts)), null, this)
                 );
 
         this.io.resetEncoder(0.0);
-       // setDefaultCommand(setElevatorPosition(0.0));
+        setDefaultCommand(setElevatorPosition(0.0));
     }
 
     public boolean supplyLED() {
@@ -142,5 +141,4 @@ public class Elevator extends SubsystemBase {
         Logger.processInputs("Elevator/Inputs", inputs);
         Logger.recordOutput("Elevator/ElevatorState", currState);
     }
-
 }
