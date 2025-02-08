@@ -1,9 +1,12 @@
 package frc.robot.subsystems.lights;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Percent;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.LEDPattern;
+
+import edu.wpi.first.wpilibj.DriverStation;
 
 import frc.robot.subsystems.lights.LightsConstants.LightStatesEnum;
 

@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.Volts;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.SignalLogger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.util.PhoenixUtil;
 
 public class Intake extends SubsystemBase {
@@ -47,8 +48,23 @@ public class Intake extends SubsystemBase {
     }
 
     public Command setIntakePositionAndVelocity(double position, double velocityRotPerSec) {
-        return setIntakePosition(position)
-               .alongWith(setIntakeVelocity(velocityRotPerSec));
+        return new FunctionalCommand(
+            () -> {
+                this.swivelGoal = position;
+                Logger.recordOutput("Intake/SwivelGoal", swivelGoal);
+                this.intakeGoalRotPerSec = velocityRotPerSec;
+                Logger.recordOutput("Intake/IntakeGoalVelocity", this.intakeGoalRotPerSec);
+
+            },
+            () -> {
+                io.swivelSetPosition(position);
+                io.intakeSetVelocity(velocityRotPerSec);
+            },
+            interrupted -> {
+            },
+            () -> PhoenixUtil.epsilonEquals(inputs.swivelPosition, position, 0.1) && PhoenixUtil.epsilonEquals(inputs.intakeVelocityRotPerSec, velocityRotPerSec, 0.1),
+            this
+        );
     }
 
     public Command setIntakePosition(double position) {

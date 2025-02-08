@@ -35,6 +35,7 @@ public class Vision extends SubsystemBase {
   private final VisionIO[] io;
   private final VisionIOInputsAutoLogged[] inputs;
   private final Alert[] disconnectedAlerts;
+  private Pose2d[] latestTargets;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -42,6 +43,8 @@ public class Vision extends SubsystemBase {
 
     // Initialize inputs
     this.inputs = new VisionIOInputsAutoLogged[io.length];
+    this.latestTargets = new Pose2d[io.length];
+
     for (int i = 0; i < inputs.length; i++) {
       inputs[i] = new VisionIOInputsAutoLogged();
     }
@@ -62,6 +65,10 @@ public class Vision extends SubsystemBase {
    */
   public Rotation2d getTargetX(int cameraIndex) {
     return inputs[cameraIndex].latestTargetObservation.tx();
+  }
+
+  public Pose2d getLatestTargetPose(int cameraIndex) {
+    return latestTargets[cameraIndex];
   }
 
   @Override
@@ -118,6 +125,7 @@ public class Vision extends SubsystemBase {
           robotPosesRejected.add(observation.pose());
         } else {
           robotPosesAccepted.add(observation.pose());
+          this.latestTargets[cameraIndex] = observation.pose().toPose2d();
         }
 
         // Skip if rejected
