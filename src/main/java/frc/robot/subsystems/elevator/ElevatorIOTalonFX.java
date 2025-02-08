@@ -9,7 +9,6 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.ParentDevice;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.filter.Debouncer;
@@ -101,7 +100,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
         inputs.leaderVelocityRadPerSec = Units.rotationsToRadians(leaderVelocity.getValueAsDouble());
         inputs.leaderAppliedVolts = leaderAppliedVolts.getValueAsDouble();
         inputs.leaderCurrentAmps = leaderCurrent.getValueAsDouble();
-
 
         // Update follower inputs
         inputs.followerConnected = followerConnectedDebounce.calculate(followerStatus.isOK());

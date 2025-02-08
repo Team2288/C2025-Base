@@ -18,7 +18,6 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.subsystems.SuperStructure;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -63,23 +62,6 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-
-  public static enum ReefTarget {
-        L1(0.0, 12.0, 0.0), 
-        L2(0.0, 0.0, 0.0),
-        L3(0.0, 0.0, 0.0),
-        L4(0.0, 0.0, 0.0);
-
-        public final double elevatorHeight;
-        public final double outtakeSpeed;
-        public final double wristPosition;
-
-        private ReefTarget(double elevatorHeight, double outtakeSpeed, double wristPosition) {
-            this.elevatorHeight = elevatorHeight;
-            this.outtakeSpeed = outtakeSpeed;
-            this.wristPosition = wristPosition;
-        }
-  }
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

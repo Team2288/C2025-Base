@@ -17,8 +17,6 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusCode;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-
 public class PhoenixUtil {
   /** Attempts to run the command until no error is produced. */
   public static void tryUntilOk(int maxAttempts, Supplier<StatusCode> command) {

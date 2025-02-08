@@ -119,6 +119,7 @@ public class Intake extends SubsystemBase {
 
     }
 
+
     @Override
     public void periodic() {
         io.updateInputs(inputs);
