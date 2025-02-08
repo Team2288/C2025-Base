@@ -79,24 +79,8 @@ public class Intake extends SubsystemBase {
         );
     }
 
-    public Command fastZero() {
-        return setIntakePosition(0.0)
-               .andThen(currentZero());
-    }
-
-    public Command currentZero() {
-        return this.run(() -> io.swivelSetVoltage(-1.0))
-               .until(() -> inputs.swivelCurrentAmps > 40.0)
-               .finallyDo(() -> {
-                    io.swivelResetEncoder(0.0);
-                    io.swivelSetVoltage(0.0);
-               });
-    }
-
     public Command characterizeSwivel() {
         return Commands.sequence(
-            this.currentZero(),
-
             this.runOnce(() -> SignalLogger.start()),
 
             swivelRoutine

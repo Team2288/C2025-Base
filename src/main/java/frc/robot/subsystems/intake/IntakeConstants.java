@@ -35,6 +35,7 @@ public class IntakeConstants {
 
     public static final double maxSwivelEncoderTicks = 0;
     public static final double minSwivelEncoderTicks = 0;
+    public static final double intakeIdle = 0.0;
 
     public static final double kSwivelGearRatio = 0;
     public static final double kIntakeGearRatio = 0;

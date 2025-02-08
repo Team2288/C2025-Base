@@ -17,6 +17,8 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusCode;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public class PhoenixUtil {
   /** Attempts to run the command until no error is produced. */
   public static void tryUntilOk(int maxAttempts, Supplier<StatusCode> command) {
@@ -29,4 +31,22 @@ public class PhoenixUtil {
   public static boolean epsilonEquals(double a, double b, double epsilon) {
     return (a - epsilon <= b) && (a + epsilon >= b);
   }
+
+  public static enum ReefTarget {
+        L1(0.0, 12.0, 0.0), 
+        L2(0.0, 0.0, 0.0),
+        L3(0.0, 0.0, 0.0),
+        L4(0.0, 0.0, 0.0);
+
+        public final double elevatorHeight;
+        public final double outtakeSpeed;
+        public final double wristPosition;
+
+        private ReefTarget(double elevatorHeight, double outtakeSpeed, double wristPosition) {
+            this.elevatorHeight = elevatorHeight;
+            this.outtakeSpeed = outtakeSpeed;
+            this.wristPosition = wristPosition;
+        }
+  }
+
 }

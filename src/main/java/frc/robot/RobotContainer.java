@@ -17,7 +17,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
-
+import frc.robot.subsystems.SuperStructure;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -39,7 +39,9 @@ import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.LightsIOAddressable;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
-
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOTalonFX;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -52,6 +54,8 @@ public class RobotContainer {
   private final Vision vision;
   private final Elevator elevator;
   private final Lights lights;
+  private final Intake intake;
+  //private final SuperStructure superstructure;
 
   // Controller
   // private final CommandJoystick controller = new CommandJoystick(0);
@@ -60,7 +64,6 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  // Reef target for Superstructure
   public static enum ReefTarget {
         L1(0.0, 12.0, 0.0), 
         L2(0.0, 0.0, 0.0),
@@ -99,6 +102,11 @@ public class RobotContainer {
 
         elevator = 
             new Elevator(new ElevatorIOTalonFX());
+        
+        intake = 
+            new Intake(new IntakeIOTalonFX());
+
+      //  superstructure = new SuperStructure(elevator, intake);
 
         break;
 
@@ -120,6 +128,10 @@ public class RobotContainer {
 
         elevator = new Elevator(new ElevatorIO() {});
 
+        intake = new Intake(new IntakeIO() {});
+
+        //superstructure = new SuperStructure(elevator, intake);
+
         break;
 
       default:
@@ -137,6 +149,10 @@ public class RobotContainer {
         lights = new Lights(new LightsIOAddressable());
 
         elevator = new Elevator(new ElevatorIO() {});
+
+        intake = new Intake(new IntakeIO() {});
+
+        //superstructure = new SuperStructure(elevator, intake);
 
         break;
     }
@@ -180,8 +196,6 @@ public class RobotContainer {
             () -> -controller.getY(),
             () -> -controller.getX(),
             () -> -controller.getZ()));
-
-        
 
     controller
         .button(1)
