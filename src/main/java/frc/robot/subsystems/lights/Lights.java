@@ -9,21 +9,19 @@ import frc.robot.subsystems.lights.LightsConstants.LightStatesEnum;
 public class Lights extends SubsystemBase {
     private final LightsIO io;
     private final LightsIOInputsAutoLogged inputs = new LightsIOInputsAutoLogged();
-    private final LightsSupplier lightsSuppliers[]; // Assumed that coral intake sensor is 1st, algae intake sensor is 2nd, acting is 3rd
+    private LightsSupplier lightsSuppliers[]; // Assumed that acting is 1st
     private boolean areSensorsEnabled[];
     
 
     public Lights(LightsIO io, LightsSupplier... supplier) {
         this.io = io;
-        this.lightsSuppliers = new LightsSupplier[supplier.length+1];
+        this.lightsSuppliers = new LightsSupplier[supplier.length];
         this.areSensorsEnabled = new boolean[supplier.length+1];
 
         this.areSensorsEnabled[0] = DriverStation.isEnabled();
 
-        if (supplier.length > 0) {
-            for (int i = 0; i < lightsSuppliers.length; i++) { // populate array
-                areSensorsEnabled[i+1] = lightsSuppliers[i].supplyLED();
-            }
+        for (int i = 0; i < supplier.length; i++) { // populate array
+            lightsSuppliers[i] = supplier[i];
         }
 
         setDefaultCommand(runPattern(LightStatesEnum.kIdle));
@@ -34,18 +32,13 @@ public class Lights extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Lights/", inputs);
 
+        populateLightSuppliers();
         areSensorsEnabled[0] = DriverStation.isEnabled();
         LightStatesEnum usingState;
 
-        if (areSensorsEnabled.length > 1) {
-            for (int i = 0; i < lightsSuppliers.length; i++) { // populate array
-                areSensorsEnabled[i+1] = lightsSuppliers[i].supplyLED();
-            }
-        }
-
         if (areSensorsEnabled[0]) { // if robot is enabled
             try {
-                if (areSensorsEnabled[3]) { // if the robot is acting (intaking or scoring)
+                if (areSensorsEnabled[1]) { // if the robot is acting (intaking or scoring)
                     usingState = LightStatesEnum.kActing;
                 } else { // if the robot is not acting (driving)
                     usingState = LightStatesEnum.kDriving;
@@ -59,8 +52,8 @@ public class Lights extends SubsystemBase {
         }
 
         try {
-            boolean hasAlgae = areSensorsEnabled[2];
-            boolean hasCoral =  areSensorsEnabled[1];
+            boolean hasAlgae = areSensorsEnabled[3];
+            boolean hasCoral =  areSensorsEnabled[2];
 
             if (hasCoral && hasAlgae) { 
                 usingState = LightStatesEnum.kHasBoth;
@@ -86,9 +79,15 @@ public class Lights extends SubsystemBase {
     
     public Command runPattern(LightStatesEnum state) {
         return run(
-            () -> io.setLEDPattern(state, true)).withTimeout(1.0) // flash for 1 second during a state change
+            () -> io.setLEDPattern(state, true)).withTimeout(0.5) // flash for 1 second during a state change
             .andThen(run(() -> io.setLEDPattern(state, false)))
             .ignoringDisable(true);
+    }
+
+    public void populateLightSuppliers(){
+        for (int i = 0; i < lightsSuppliers.length; i++) { // populate array
+            areSensorsEnabled[i+1] = lightsSuppliers[i].supplyLED();
+        }
     }
     
     @FunctionalInterface

@@ -18,17 +18,21 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.subsystems.SuperStructure;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
+import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
@@ -37,11 +41,14 @@ import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.LightsIOAddressable;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.PhoenixUtil.ReefTarget;
 import frc.robot.subsystems.intake.IntakeIO;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -56,11 +63,15 @@ public class RobotContainer {
   private final Elevator elevator;
   private final Lights lights;
   private final Intake intake;
-  //private final SuperStructure superstructure;
+  private final SuperStructure superstructure;
 
   // Controller
   // private final CommandJoystick controller = new CommandJoystick(0);
   private final CommandJoystick controller = new CommandJoystick(0);
+  private final CommandXboxController codriver = new CommandXboxController(1);
+
+  private ReefTarget selectedReefTarget = ReefTarget.L4;
+  private int scoringState = 0; // 0 : No score, 1: Ready to score, 2: Scored
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -82,16 +93,17 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement, new VisionIOLimelight("front", drive::getRotation)
             ); //new VisionIOLimelight("ironman", drive::getRotation));
-        lights = 
-            new Lights(new LightsIOAddressable());
 
         elevator = 
             new Elevator(new ElevatorIOTalonFX());
         
         intake = 
-            new Intake(new IntakeIO() {});
+            new Intake(new IntakeIOTalonFX());
 
-      //  superstructure = new SuperStructure(elevator, intake);
+        superstructure = new SuperStructure(elevator, intake);
+
+        lights = new Lights(new LightsIOAddressable(), superstructure::supplyLED);
+
 
         break;
 
@@ -109,13 +121,13 @@ public class RobotContainer {
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
 
-        lights = new Lights(new LightsIOAddressable());
-
         elevator = new Elevator(new ElevatorIO() {});
 
         intake = new Intake(new IntakeIO() {});
 
-        //superstructure = new SuperStructure(elevator, intake);
+        superstructure = new SuperStructure(elevator, intake);
+
+        lights = new Lights(new LightsIOAddressable(), superstructure::supplyLED);
 
         break;
 
@@ -131,13 +143,13 @@ public class RobotContainer {
 
         vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
 
-        lights = new Lights(new LightsIOAddressable());
-
         elevator = new Elevator(new ElevatorIO() {});
 
         intake = new Intake(new IntakeIO() {});
 
-        //superstructure = new SuperStructure(elevator, intake);
+        superstructure = new SuperStructure(elevator, intake);
+
+        lights = new Lights(new LightsIOAddressable(), superstructure::supplyLED);
 
         break;
     }
@@ -182,21 +194,28 @@ public class RobotContainer {
             () -> -controller.getX(),
             () -> -controller.getZ()));
 
-    controller
-        .button(1)
-        .onTrue(elevator.setElevatorPosition(2));
+    controller.button(1).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L4));
+    controller.button(2).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L3));
+    controller.button(3).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L2));
+    controller.button(4).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L1));
 
-    controller
-        .button(2)
-        .onTrue(elevator.setElevatorPosition(3));
+    codriver
+        .a()
+        .onTrue(
+            superstructure.intake()
+        );
 
-    controller
-        .button(3)
-        .onTrue(elevator.setElevatorPosition(4));
+    codriver
+        .x()
+        .onTrue(
+            superstructure.scoreStateMachine(selectedReefTarget)
+        );
 
-    controller
-        .button(4)
-        .onTrue(elevator.fastZero());
+    codriver
+        .y()
+        .onTrue(
+            superstructure.robotIdle()
+        );
 
 
     // Lock to 0° when A button is held

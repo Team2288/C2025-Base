@@ -44,27 +44,12 @@ public class Intake extends SubsystemBase {
                 );
 
         this.io.swivelResetEncoder(0.0);
-        setDefaultCommand(setIntakePositionAndVelocity(0.0, 0.0));
+       // setDefaultCommand(setIntakePositionAndVelocity(0.0, 0.0));
     }
 
-    public Command setIntakePositionAndVelocity(double position, double velocityRotPerSec) {
-        return new FunctionalCommand(
-            () -> {
-                this.swivelGoal = position;
-                Logger.recordOutput("Intake/SwivelGoal", swivelGoal);
-                this.intakeGoalRotPerSec = velocityRotPerSec;
-                Logger.recordOutput("Intake/IntakeGoalVelocity", this.intakeGoalRotPerSec);
-
-            },
-            () -> {
-                io.swivelSetPosition(position);
-                io.intakeSetVelocity(velocityRotPerSec);
-            },
-            interrupted -> {
-            },
-            () -> PhoenixUtil.epsilonEquals(inputs.swivelPosition, position, 0.1) && PhoenixUtil.epsilonEquals(inputs.intakeVelocityRotPerSec, velocityRotPerSec, 0.1),
-            this
-        );
+    public Command setIntakePositionAndVoltage(double position, double volts) {
+        return setIntakePosition(position)
+               .andThen(setIntakeVoltage(volts));
     }
 
     public Command setIntakePosition(double position) {
@@ -95,13 +80,17 @@ public class Intake extends SubsystemBase {
         );
     }
 
+    public Command setIntakeVoltage(double voltage) {
+        return runOnce(() -> io.intakeSetVoltage(voltage));
+    }
+
     public Command characterizeSwivel() {
         return Commands.sequence(
             this.runOnce(() -> SignalLogger.start()),
 
             swivelRoutine
                 .quasistatic(Direction.kForward)
-                .until(() -> inputs.swivelPosition > IntakeConstants.maxSwivelEncoderTicks - 0.8),
+                .until(() -> inputs.swivelPosition > 20),
 
             this.runOnce(() -> io.swivelSetVoltage(0.0)),
 
@@ -110,7 +99,7 @@ public class Intake extends SubsystemBase {
             // Stop when we get close to max to avoid hitting hard stop
             swivelRoutine
                 .quasistatic(Direction.kReverse)
-                .until(() -> inputs.swivelPosition < 1),
+                .until(() -> inputs.swivelPosition < 5),
 
             this.runOnce(() -> io.swivelSetVoltage(0.0)),
 
@@ -119,7 +108,7 @@ public class Intake extends SubsystemBase {
             // Stop when we get close to max to avoid hitting hard stop
             swivelRoutine
                 .dynamic(Direction.kForward)
-                .until(() -> inputs.swivelPosition > IntakeConstants.maxSwivelEncoderTicks - 0.8),
+                .until(() -> inputs.swivelPosition > 20),
 
             this.runOnce(() -> io.swivelSetVoltage(0.0)),
 
@@ -128,11 +117,16 @@ public class Intake extends SubsystemBase {
             // Stop when we get close to max to avoid hitting hard stop
             swivelRoutine
                 .dynamic(Direction.kReverse)
-                .until(() -> inputs.swivelPosition < 1),
+                .until(() -> inputs.swivelPosition < 5),
 
             this.runOnce(() -> SignalLogger.stop())
         );
 
+    }
+
+    public Command intake() {
+        return setIntakePositionAndVoltage(IntakeConstants.intakeIntake, -8)
+               .until(() -> inputs.intakeCurrentAmps > 80);
     }
 
 

@@ -49,7 +49,7 @@ public class Elevator extends SubsystemBase {
                 );
 
         this.io.resetEncoder(0.0);
-        setDefaultCommand(setElevatorPosition(0.0));
+        //setDefaultCommand(setElevatorPosition(0.0));
     }
 
     public boolean supplyLED() {

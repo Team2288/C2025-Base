@@ -32,9 +32,9 @@ public class PhoenixUtil {
 
   public static enum ReefTarget {
         L1(0.0, 12.0, 0.0), 
-        L2(0.0, 0.0, 0.0),
-        L3(0.0, 0.0, 0.0),
-        L4(0.0, 0.0, 0.0);
+        L2(0.8693, 10, 9.357),
+        L3(2.71918, 10, 8.5),
+        L4(4.6, 5, 8);
 
         public final double elevatorHeight;
         public final double outtakeSpeed;

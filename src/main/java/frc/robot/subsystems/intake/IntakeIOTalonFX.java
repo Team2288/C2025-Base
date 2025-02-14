@@ -65,15 +65,15 @@ public class IntakeIOTalonFX implements IntakeIO {
         swivelConfig.Slot0 = IntakeConstants.swivelGains;
         intakeConfig.Feedback.SensorToMechanismRatio = IntakeConstants.kSwivelGearRatio;
 
-        swivelConfig.MotionMagic.MotionMagicCruiseVelocity = 80;
-        swivelConfig.MotionMagic.MotionMagicAcceleration = 400;
+        swivelConfig.MotionMagic.MotionMagicCruiseVelocity = 130;
+        swivelConfig.MotionMagic.MotionMagicAcceleration = 300;
         swivelConfig.MotionMagic.MotionMagicJerk = 0;
 
         tryUntilOk(5, () -> krakenIntake.getConfigurator().apply(intakeConfig, 0.25));
-        tryUntilOk(5, () -> krakenIntake.setPosition(0.0, 0.25));
+       // tryUntilOk(5, () -> krakenIntake.setPosition(0.0, 0.25));
 
         tryUntilOk(5, () -> krakenSwivel.getConfigurator().apply(swivelConfig, 0.25));
-        tryUntilOk(5, () -> krakenSwivel.setPosition(0.0, 0.25));
+       // tryUntilOk(5, () -> krakenSwivel.setPosition(0.0, 0.25));
 
         // Create intake status signals
         intakeVelocity = krakenIntake.getVelocity();
