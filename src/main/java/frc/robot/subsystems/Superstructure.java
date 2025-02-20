@@ -5,13 +5,11 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.util.PhoenixUtil.ReefTarget;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.intake.IntakeConstants;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.lights.Lights;
 
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 
@@ -20,7 +18,6 @@ public class SuperStructure {
     Intake intake;
     Lights lights;
     SuperState state;
-    boolean hasCoral;
 
     public static enum SuperState {
         SCORING,
@@ -46,20 +43,19 @@ public class SuperStructure {
         )
         .beforeStarting(() -> {
             this.state = SuperState.SCORING;
-            Logger.recordOutput("SuperStructure/State", this.state);
         });
     }
 
     public Command score(ReefTarget target) {
         return intake.setIntakeVoltage(target.outtakeSpeed)
                .andThen(new WaitCommand(0.10))
-               .andThen(robotIdle())
+               //.andThen(robotIdle())
                .beforeStarting(() -> {
                     this.state = SuperState.SCORED;
-               })
-               .finallyDo(() -> {
-                    this.state = SuperState.IDLE;
                });
+               //.finallyDo(() -> {
+               //     this.state = SuperState.IDLE;
+               //});
     }
 
     public Command robotIdle() {
@@ -68,7 +64,6 @@ public class SuperStructure {
             this.elevator.fastZero()
         ).beforeStarting(() -> {
             this.state = SuperState.IDLE;
-            Logger.recordOutput("SuperStructure/State", this.state);
         });
     }
 
@@ -78,9 +73,11 @@ public class SuperStructure {
 
     public Command intake() {
         return intake.intake()
-               .beforeStarting(() -> this.state = SuperState.INTAKING);
+               .beforeStarting(() -> this.state = SuperState.INTAKING)
+               .andThen(robotIdle());
     }
 
+    
     public Command scoreStateMachine(ReefTarget target) {
         return new ConditionalCommand(
             readyToScore(target),
@@ -88,9 +85,19 @@ public class SuperStructure {
             () -> this.state == SuperState.IDLE
         );
     }
+        
+/* 
+    public Command scoreStateMachine(ReefTarget target) {
+        return new SequentialCommandGroup(
+            readyToScore(target),
+            score(target)
+        );
+    }
+        */
 
-    @AutoLogOutput(key = "Superstate/State")
+    @AutoLogOutput(key = "Superstructure/State")
     public SuperState getState() {
         return this.state;
     }
+
 }

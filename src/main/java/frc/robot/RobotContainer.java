@@ -43,12 +43,9 @@ import frc.robot.subsystems.lights.LightsIOAddressable;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.PhoenixUtil.ReefTarget;
 import frc.robot.subsystems.intake.IntakeIO;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIO;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -70,9 +67,6 @@ public class RobotContainer {
   private final CommandJoystick controller = new CommandJoystick(0);
   private final CommandXboxController codriver = new CommandXboxController(1);
 
-  private ReefTarget selectedReefTarget = ReefTarget.L4;
-  private int scoringState = 0; // 0 : No score, 1: Ready to score, 2: Scored
-
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
@@ -91,7 +85,9 @@ public class RobotContainer {
 
         vision =
             new Vision(
-                drive::addVisionMeasurement, new VisionIOLimelight("front", drive::getRotation)
+                drive::addVisionMeasurement, 
+                new VisionIOLimelight("limelight-front", drive::getRotation),
+                new VisionIOLimelight("limelight-back", drive::getRotation)
             ); //new VisionIOLimelight("ironman", drive::getRotation));
 
         elevator = 
@@ -194,21 +190,10 @@ public class RobotContainer {
             () -> -controller.getX(),
             () -> -controller.getZ()));
 
-    controller.button(1).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L4));
-    controller.button(2).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L3));
-    controller.button(3).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L2));
-    controller.button(4).onTrue(new InstantCommand(() -> selectedReefTarget = ReefTarget.L1));
-
     codriver
         .a()
         .onTrue(
             superstructure.intake()
-        );
-
-    codriver
-        .x()
-        .onTrue(
-            superstructure.scoreStateMachine(selectedReefTarget)
         );
 
     codriver
@@ -217,6 +202,26 @@ public class RobotContainer {
             superstructure.robotIdle()
         );
 
+
+    codriver.leftBumper()
+        .onTrue(
+            superstructure.scoreStateMachine(ReefTarget.L4)
+        );
+
+    codriver.rightBumper()
+        .onTrue(
+            superstructure.scoreStateMachine(ReefTarget.L3)
+        );
+
+    codriver.leftTrigger()
+        .onTrue(
+            superstructure.scoreStateMachine(ReefTarget.L2)
+        );
+
+    codriver.rightTrigger()
+        .onTrue(
+            superstructure.scoreStateMachine(ReefTarget.L1)
+        );
 
     // Lock to 0° when A button is held
     /* 
@@ -256,4 +261,6 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+
 }

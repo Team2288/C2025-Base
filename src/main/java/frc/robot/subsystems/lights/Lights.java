@@ -79,7 +79,7 @@ public class Lights extends SubsystemBase {
     
     public Command runPattern(LightStatesEnum state) {
         return run(
-            () -> io.setLEDPattern(state, true)).withTimeout(0.5) // flash for 1 second during a state change
+            () -> io.setLEDPattern(state, true)).withTimeout(1.0) // flash for 1 second during a state change
             .andThen(run(() -> io.setLEDPattern(state, false)))
             .ignoringDisable(true);
     }

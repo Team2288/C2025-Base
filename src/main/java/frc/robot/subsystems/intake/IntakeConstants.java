@@ -30,14 +30,14 @@ public class IntakeConstants {
     public static final TalonFXConfiguration intakeConfiguration = new TalonFXConfiguration()
         .withCurrentLimits(
             new CurrentLimitsConfigs()
-                .withStatorCurrentLimit(Amps.of(40))
+                .withStatorCurrentLimit(Amps.of(20))
                 .withStatorCurrentLimitEnable(true)
         );
 
     public static final double maxSwivelEncoderTicks = 22.803;
     public static final double minSwivelEncoderTicks = 0;
     public static final double intakeIdle = 15.25;
-    public static final double intakeIntake = 19.910;
+    public static final double intakeIntake = 20.910;
 
     public static final double kSwivelGearRatio = 60;
     public static final double kIntakeGearRatio = 9;

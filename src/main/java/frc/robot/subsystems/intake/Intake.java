@@ -8,9 +8,11 @@ import com.ctre.phoenix6.SignalLogger;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
@@ -23,6 +25,8 @@ public class Intake extends SubsystemBase {
 
     private double swivelGoal, intakeGoalRotPerSec;
     private final SysIdRoutine swivelRoutine;
+    
+    private DigitalInput beambreak;
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -31,6 +35,8 @@ public class Intake extends SubsystemBase {
 
         this.swivelGoal = 0.0;
         this.intakeGoalRotPerSec = 0.0;
+
+        this.beambreak = new DigitalInput(8);
 
         swivelRoutine =
             new SysIdRoutine(
@@ -48,8 +54,18 @@ public class Intake extends SubsystemBase {
     }
 
     public Command setIntakePositionAndVoltage(double position, double volts) {
-        return setIntakePosition(position)
-               .andThen(setIntakeVoltage(volts));
+        return new FunctionalCommand(
+            () -> {
+                this.swivelGoal = position;
+                Logger.recordOutput("Intake/SwivelGoal", swivelGoal);
+            },
+            () -> {io.swivelSetPosition(position); io.intakeSetVoltage(volts);},
+            interrupted -> {
+            },
+            () -> getBeambreak(),
+            this
+        ).andThen(new WaitCommand(0.3));
+
     }
 
     public Command setIntakePosition(double position) {
@@ -60,6 +76,7 @@ public class Intake extends SubsystemBase {
             },
             () -> io.swivelSetPosition(position),
             interrupted -> {
+
             },
             () -> PhoenixUtil.epsilonEquals(inputs.swivelPosition, position, 0.1),
             this
@@ -126,13 +143,19 @@ public class Intake extends SubsystemBase {
 
     public Command intake() {
         return setIntakePositionAndVoltage(IntakeConstants.intakeIntake, -8)
-               .until(() -> inputs.intakeCurrentAmps > 80);
+               .until(() -> getBeambreak());
+    }
+
+    public boolean getBeambreak(){
+        return !beambreak.get();
     }
 
 
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+
+        System.out.println(getBeambreak());
 
         swivelConnected.set(inputs.swivelConnected);
         intakeConnected.set(inputs.intakeConnected);

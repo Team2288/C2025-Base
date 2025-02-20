@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.util.PhoenixUtil;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Elevator extends SubsystemBase {
     private final ElevatorIO io;
