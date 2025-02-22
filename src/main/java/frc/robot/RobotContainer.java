@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -169,6 +170,11 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     
+    NamedCommands.registerCommand("L4_Ready", superstructure.readyToScore(ReefTarget.L4));
+    NamedCommands.registerCommand("Idle", superstructure.robotIdle());
+    NamedCommands.registerCommand("Intake", superstructure.intake());
+    NamedCommands.registerCommand("Score", superstructure.score(ReefTarget.L4));
+
     SignalLogger.setPath("/home/lvuser/logs/");
 
     // Configure the button bindings
@@ -188,7 +194,8 @@ public class RobotContainer {
             drive,
             () -> -controller.getY(),
             () -> -controller.getX(),
-            () -> -controller.getZ()));
+            () -> -controller.getZ(),
+            () -> superstructure.isSlow()));
 
     codriver
         .a()

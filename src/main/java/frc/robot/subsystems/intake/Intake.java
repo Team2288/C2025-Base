@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
        // setDefaultCommand(setIntakePositionAndVelocity(0.0, 0.0));
     }
 
-    public Command setIntakePositionAndVoltage(double position, double volts) {
+    public Command setIntakePositionAndVoltageBeambreak(double position, double volts) {
         return new FunctionalCommand(
             () -> {
                 this.swivelGoal = position;
@@ -64,9 +64,25 @@ public class Intake extends SubsystemBase {
             },
             () -> getBeambreak(),
             this
-        ).andThen(new WaitCommand(0.3));
+        );
 
     }
+
+    public Command setIntakePositionAndVoltageNoBeambreak(double position, double volts) {
+        return new FunctionalCommand(
+            () -> {
+                this.swivelGoal = position;
+                Logger.recordOutput("Intake/SwivelGoal", swivelGoal);
+            },
+            () -> {io.swivelSetPosition(position); io.intakeSetVoltage(volts);},
+            interrupted -> {
+            },
+            () -> true,
+            this
+        );
+
+    }
+
 
     public Command setIntakePosition(double position) {
         return new FunctionalCommand(
@@ -142,7 +158,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command intake() {
-        return setIntakePositionAndVoltage(IntakeConstants.intakeIntake, -8)
+        return setIntakePositionAndVoltageBeambreak(IntakeConstants.intakeIntake, -8)
                .until(() -> getBeambreak());
     }
 
@@ -154,8 +170,6 @@ public class Intake extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
-
-        System.out.println(getBeambreak());
 
         swivelConnected.set(inputs.swivelConnected);
         intakeConnected.set(inputs.intakeConnected);

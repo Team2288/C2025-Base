@@ -35,6 +35,10 @@ public class SuperStructure {
         this.state = SuperState.IDLE;
     }
 
+    public boolean isSlow() {
+        return this.state == SuperState.SCORING || this.state == SuperState.SCORED;
+    }
+
     public Command readyToScore(ReefTarget target) {
         return new SequentialCommandGroup(
             intake.setIntakePosition(IntakeConstants.intakeIdle),
@@ -48,32 +52,28 @@ public class SuperStructure {
 
     public Command score(ReefTarget target) {
         return intake.setIntakeVoltage(target.outtakeSpeed)
-               .andThen(new WaitCommand(0.10))
-               //.andThen(robotIdle())
                .beforeStarting(() -> {
                     this.state = SuperState.SCORED;
                });
-               //.finallyDo(() -> {
-               //     this.state = SuperState.IDLE;
-               //});
     }
 
     public Command robotIdle() {
         return new SequentialCommandGroup(
-            this.intake.setIntakePositionAndVoltage(IntakeConstants.intakeIdle, 0.0),
+            this.intake.setIntakePositionAndVoltageNoBeambreak(IntakeConstants.intakeIdle, -1),
             this.elevator.fastZero()
-        ).beforeStarting(() -> {
+        ).andThen(() -> {
             this.state = SuperState.IDLE;
         });
     }
 
     public boolean supplyLED() {
-        return this.state == SuperState.SCORING || this.state == SuperState.INTAKING;
+        return this.state == SuperState.SCORING || this.state == SuperState.SCORED || this.state == SuperState.INTAKING;
     }
 
     public Command intake() {
         return intake.intake()
                .beforeStarting(() -> this.state = SuperState.INTAKING)
+               .andThen(new WaitCommand(0.1))
                .andThen(robotIdle());
     }
 

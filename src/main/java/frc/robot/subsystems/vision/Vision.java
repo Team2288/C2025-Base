@@ -100,6 +100,7 @@ public class Vision extends SubsystemBase {
         var tagPose = aprilTagLayout.getTagPose(tagId);
         if (tagPose.isPresent()) {
           tagPoses.add(tagPose.get());
+          this.latestTargets[cameraIndex] = tagPose.get().toPose2d();
         }
       }
 
@@ -125,7 +126,6 @@ public class Vision extends SubsystemBase {
           robotPosesRejected.add(observation.pose());
         } else {
           robotPosesAccepted.add(observation.pose());
-          this.latestTargets[cameraIndex] = observation.pose().toPose2d();
         }
 
         // Skip if rejected
