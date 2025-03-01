@@ -80,9 +80,7 @@ public class Intake extends SubsystemBase {
             () -> true,
             this
         );
-
     }
-
 
     public Command setIntakePosition(double position) {
         return new FunctionalCommand(

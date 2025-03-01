@@ -32,8 +32,8 @@
    "val":54.4310844
   },
   "inertia":{
-   "exp":"6 kg m ^ 2",
-   "val":6.0
+   "exp":"6.883 kg m ^ 2",
+   "val":6.883
   },
   "gearing":{
    "exp":"6.746031746031747",
@@ -57,16 +57,16 @@
   },
   "bumper":{
    "front":{
-    "exp":"18.25 in",
-    "val":0.46355
+    "exp":"17.875 in",
+    "val":0.454025
    },
    "side":{
-    "exp":"18.25 in",
-    "val":0.46355
+    "exp":"17.875 in",
+    "val":0.454025
    },
    "back":{
-    "exp":"18.25 in",
-    "val":0.46355
+    "exp":"17.875 in",
+    "val":0.454025
    }
   },
   "differentialTrackWidth":{

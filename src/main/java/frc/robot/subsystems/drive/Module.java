@@ -87,19 +87,17 @@ public class Module {
   /** Runs the module with the specified output while controlling to zero degrees. */
   
   public void runCharacterization(double output) {
-    io.setDriveOpenLoop(output);
-    io.setTurnPosition(new Rotation2d());
+    io.setDriveVelocity(0);
+    io.setTurnPosition(new Rotation2d(output));
   }
   
 
   /** Runs the turn modules with the specified output */
 
-  /* 
-  public void runCharacterization(double output) {
-    io.setDriveOpenLoop(0.0);
-    io.setTurnOpenLoop(output);
+  public void runTorqueCharacterization(double output) {
+    io.setDriveOpenLoop(output);
+    io.setTurnPosition(new Rotation2d());
   }
-    */
 
 
   /** Disables all outputs to motors. */

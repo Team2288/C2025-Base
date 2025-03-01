@@ -15,10 +15,13 @@ package frc.robot;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import frc.robot.subsystems.SuperStructure;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,6 +39,7 @@ import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.commands.DriveToPose;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
@@ -43,8 +47,10 @@ import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.LightsIOAddressable;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.PhoenixUtil.ReefTarget;
+import frc.robot.util.PhoenixUtil;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
@@ -88,8 +94,10 @@ public class RobotContainer {
             new Vision(
                 drive::addVisionMeasurement, 
                 new VisionIOLimelight("limelight-front", drive::getRotation),
-                new VisionIOLimelight("limelight-back", drive::getRotation)
-            ); //new VisionIOLimelight("ironman", drive::getRotation));
+                new VisionIOLimelight("limelight-back", drive::getRotation),
+                new VisionIOPhotonVision("cameraRight", VisionConstants.robotToCameraRight),
+                new VisionIOPhotonVision("cameraLeft", VisionConstants.robotToCameraLeft)
+            ); 
 
         elevator = 
             new Elevator(new ElevatorIOTalonFX());
@@ -158,7 +166,13 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive Wheel Radius Characterization", DriveCommands.wheelRadiusCharacterization(drive));
     autoChooser.addOption(
-        "Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
+        "Drive Voltage Characterization", DriveCommands.feedforwardCharacterization(drive));
+    autoChooser.addOption(
+        "Drive Torque Characterization", drive.sysIDFullRoutine());
+
+    autoChooser.addOption(
+        "Test Auto12", AutoBuilder.buildAuto("autotest"));
+
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -196,6 +210,15 @@ public class RobotContainer {
             () -> -controller.getX(),
             () -> -controller.getZ(),
             () -> superstructure.isSlow()));
+
+    controller
+        .trigger()
+        .whileTrue(
+            new DriveToPose(
+                drive,
+                () -> PhoenixUtil.getClosestPose(drive.getPose())
+            )
+        );
 
     codriver
         .a()

@@ -17,13 +17,45 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.StatusCode;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+
 public class PhoenixUtil {
   /** Attempts to run the command until no error is produced. */
+
+  private static Pose2d[] poseList = {
+    new Pose2d(
+      new Translation2d(3.518732309341430, 5.2934465408325195),
+      new Rotation2d(-1.0460000271115275)
+    ),
+    new Pose2d(
+      new Translation2d(3.518732309341430, 5.2934465408325195),
+      new Rotation2d(-1.0460000271115275)
+    )
+  };
+
   public static void tryUntilOk(int maxAttempts, Supplier<StatusCode> command) {
     for (int i = 0; i < maxAttempts; i++) {
       var error = command.get();
       if (error.isOK()) break;
     }
+  }
+
+  public static Pose2d getClosestPose(Pose2d currPose) {
+    double min_distance = 99999;
+    Pose2d min_distance_pose = new Pose2d();
+
+    for (int i = 0; i < poseList.length; i++) {
+      double dist = currPose.getTranslation().getDistance(poseList[i].getTranslation());
+
+      if (dist < min_distance) {
+        min_distance = dist;
+        min_distance_pose = poseList[i];
+      }
+    }
+
+    return min_distance_pose;
   }
   
   public static boolean epsilonEquals(double a, double b, double epsilon) {
