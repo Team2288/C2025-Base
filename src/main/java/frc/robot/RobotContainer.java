@@ -212,7 +212,7 @@ public class RobotContainer {
             () -> superstructure.isSlow()));
 
     controller
-        .trigger()
+        .button(18)
         .whileTrue(
             new DriveToPose(
                 drive,

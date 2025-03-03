@@ -26,12 +26,12 @@ public class PhoenixUtil {
 
   private static Pose2d[] poseList = {
     new Pose2d(
-      new Translation2d(3.518732309341430, 5.2934465408325195),
-      new Rotation2d(-1.0460000271115275)
+      new Translation2d(3.807257890701294   , 5.02553129196167  ),
+      new Rotation2d(-1.0240071646053643)
     ),
     new Pose2d(
-      new Translation2d(3.518732309341430, 5.2934465408325195),
-      new Rotation2d(-1.0460000271115275)
+      new Translation2d(4.095782279968262  , 5.231619834899902  ),
+      new Rotation2d(-1.0240071646053643)
     )
   };
 
@@ -66,7 +66,7 @@ public class PhoenixUtil {
         L1(0.0, 3, 15.25), 
         L2(0.6693, 10, 9.357),
         L3(2.31918, 10, 8.5),
-        L4(4.6, 5, 8.8);
+        L4(4.65, 5, 9.0);
 
         public final double elevatorHeight;
         public final double outtakeSpeed;

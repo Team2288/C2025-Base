@@ -58,7 +58,7 @@ public class DriveToPose extends Command {
   static {
     drivekP.initDefault(2.0);
     drivekD.initDefault(0.0);
-    thetakP.initDefault(5.0);
+    thetakP.initDefault(1.0);
     thetakD.initDefault(0.0);
     driveMaxVelocity.initDefault(Units.inchesToMeters(150.0));
     driveMaxVelocitySlow.initDefault(Units.inchesToMeters(50.0));
@@ -74,15 +74,15 @@ public class DriveToPose extends Command {
     ffMaxRadius.initDefault(0.8);
   }
 
-  private final Drive drive;
+  private Drive drive;
   private final Supplier<Pose2d> target;
   private boolean running = false;
   private final ProfiledPIDController driveController =
       new ProfiledPIDController(
-          0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
+          2.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
   private final ProfiledPIDController thetaController =
       new ProfiledPIDController(
-          0.0, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
+          0.5, 0.0, 0.0, new TrapezoidProfile.Constraints(0.0, 0.0));
 
   private Translation2d lastSetpointTranslation = new Translation2d();
   private double driveErrorAbs = 0.0;
@@ -92,8 +92,8 @@ public class DriveToPose extends Command {
   private DoubleSupplier omegaFF = () -> 0.0;
 
   public DriveToPose(Drive drive, Supplier<Pose2d> target) {
-    this.drive = drive;
     this.target = target;
+    this.drive = drive;
 
     // Enable continuous input for theta controller
     thetaController.enableContinuousInput(-Math.PI, Math.PI);
@@ -104,6 +104,7 @@ public class DriveToPose extends Command {
   @Override
   public void initialize() {
     Pose2d currentPose = drive.getPose();
+    System.out.println("Command initialized!");
     ChassisSpeeds fieldVelocity = drive.getChassisSpeeds();
     Translation2d linearFieldVelocity =
         new Translation2d(fieldVelocity.vxMetersPerSecond, fieldVelocity.vyMetersPerSecond);
