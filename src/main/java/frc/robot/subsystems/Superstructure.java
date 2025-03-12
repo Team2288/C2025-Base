@@ -20,7 +20,10 @@ public class SuperStructure {
     SuperState state;
 
     public static enum SuperState {
-        SCORING,
+        SCORING_L4,
+        SCORING_L3,
+        SCORING_L2,
+        SCORING_L1,
         HAS_CORAL,
         HAS_ALGAE,
         INTAKING,
@@ -35,8 +38,14 @@ public class SuperStructure {
         this.state = SuperState.IDLE;
     }
 
-    public boolean isSlow() {
-        return this.state == SuperState.SCORING || this.state == SuperState.SCORED;
+    public double getSlow() {
+        if (this.state == SuperState.SCORING_L4) {
+            return 2;
+        } else if (this.state == SuperState.SCORING_L3) {
+            return 1.3;
+        } else {
+            return 1;
+        }
     }
 
     public Command readyToScore(ReefTarget target) {
@@ -46,7 +55,15 @@ public class SuperStructure {
             intake.setIntakePosition(target.wristPosition)
         )
         .beforeStarting(() -> {
-            this.state = SuperState.SCORING;
+            if (target.equals(ReefTarget.L4)) {
+                this.state = SuperState.SCORING_L4;
+            } else if (target.equals(ReefTarget.L3)) {
+                this.state = SuperState.SCORING_L3;
+            } else if (target.equals(ReefTarget.L2)) {
+                this.state = SuperState.SCORING_L2;
+            } else {
+                this.state = SuperState.SCORING_L1;
+            }
         });
     }
 
@@ -67,14 +84,14 @@ public class SuperStructure {
     }
 
     public boolean supplyLED() {
-        return this.state == SuperState.SCORING || this.state == SuperState.SCORED || this.state == SuperState.INTAKING;
+        return this.state == SuperState.SCORING_L4 || this.state == SuperState.SCORING_L3 || this.state == SuperState.SCORING_L2 || this.state == SuperState.SCORING_L1 || this.state == SuperState.SCORED || this.state == SuperState.INTAKING;
     }
 
     public Command intake() {
         return intake.intake()
-               .beforeStarting(() -> this.state = SuperState.INTAKING)
-               .andThen(new WaitCommand(0.1))
-               .andThen(robotIdle());
+               .beforeStarting(() -> this.state = SuperState.INTAKING);
+              // .andThen(new WaitCommand(0.1))
+              // .andThen(robotIdle());
     }
 
     

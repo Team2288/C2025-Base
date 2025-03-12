@@ -7,7 +7,85 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start-Go"
+            "pathName": "Start-Lineup.0"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4_Ready"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Retreat"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Idle"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake-Lineup.0"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score-Lineup.0"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4_Ready"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score-2.0"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Retreat-2.0"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Idle"
           }
         }
       ]

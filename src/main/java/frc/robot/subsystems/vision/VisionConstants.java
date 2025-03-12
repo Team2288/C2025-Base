@@ -37,7 +37,7 @@ public class VisionConstants {
       new Transform3d(0.066675, 0.2524125, 0.1984375, new Rotation3d(0.0, 0.0, Math.PI/2));
 
   // Basic filtering thresholds
-  public static double maxAmbiguity = 0.30;
+  public static double maxAmbiguity = 0.2;
   public static double maxZError = 0.75;
 
   // Standard deviation baselines, for 1 meter distance and 1 tag
@@ -49,7 +49,7 @@ public class VisionConstants {
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors =
       new double[] {
-        0.5, // Camera 0
+        0.3, // Camera 0
         1.0, // Camera 1
         1.0,
         1.0

@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import com.pathplanner.lib.auto.NamedCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -54,6 +55,7 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
+import java.util.function.Supplier;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -73,6 +75,8 @@ public class RobotContainer {
   // private final CommandJoystick controller = new CommandJoystick(0);
   private final CommandJoystick controller = new CommandJoystick(0);
   private final CommandXboxController codriver = new CommandXboxController(1);
+  private boolean isLeft = false;
+  
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -93,11 +97,20 @@ public class RobotContainer {
         vision =
             new Vision(
                 drive::addVisionMeasurement, 
-                new VisionIOLimelight("limelight-front", drive::getRotation),
-                new VisionIOLimelight("limelight-back", drive::getRotation),
-                new VisionIOPhotonVision("cameraRight", VisionConstants.robotToCameraRight),
-                new VisionIOPhotonVision("cameraLeft", VisionConstants.robotToCameraLeft)
+                drive::getPose,
+                new VisionIOLimelight("limelight-front", drive::getRotation)
+             //   new VisionIOPhotonVision("cameraRight", VisionConstants.robotToCameraLeft)
+               // new VisionIOPhotonVision("cameraLeft", VisionConstants.robotToCameraLeft)
             ); 
+        
+        /* 
+        vision = new Vision(
+            drive::addVisionMeasurement,
+            drive::getPose,
+            new VisionIO() {}
+        );
+        */
+        
 
         elevator = 
             new Elevator(new ElevatorIOTalonFX());
@@ -124,7 +137,7 @@ public class RobotContainer {
 
         // we do not need vision simulation, disable IO
 
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, drive::getPose, new VisionIO() {});
 
         elevator = new Elevator(new ElevatorIO() {});
 
@@ -146,7 +159,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {});
 
-        vision = new Vision(drive::addVisionMeasurement, new VisionIO() {});
+        vision = new Vision(drive::addVisionMeasurement, drive::getPose, new VisionIO() {});
 
         elevator = new Elevator(new ElevatorIO() {});
 
@@ -158,6 +171,10 @@ public class RobotContainer {
 
         break;
     }
+    NamedCommands.registerCommand("L4_Ready", superstructure.readyToScore(ReefTarget.L4));
+    NamedCommands.registerCommand("Idle", superstructure.robotIdle());
+    NamedCommands.registerCommand("Intake", superstructure.intake());
+    NamedCommands.registerCommand("Score", new SequentialCommandGroup(superstructure.score(ReefTarget.L4), new WaitCommand(0.4)));
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -184,11 +201,6 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     
-    NamedCommands.registerCommand("L4_Ready", superstructure.readyToScore(ReefTarget.L4));
-    NamedCommands.registerCommand("Idle", superstructure.robotIdle());
-    NamedCommands.registerCommand("Intake", superstructure.intake());
-    NamedCommands.registerCommand("Score", superstructure.score(ReefTarget.L4));
-
     SignalLogger.setPath("/home/lvuser/logs/");
 
     // Configure the button bindings
@@ -209,14 +221,38 @@ public class RobotContainer {
             () -> -controller.getY(),
             () -> -controller.getX(),
             () -> -controller.getZ(),
-            () -> superstructure.isSlow()));
+            () -> superstructure.getSlow()));
+
+    controller
+        .button(16)
+        .onTrue(
+            new InstantCommand(() -> this.isLeft = true)
+        );
+
+
+    controller
+        .button(17)
+        .onTrue(
+            new InstantCommand(() -> this.isLeft = false)
+        );
 
     controller
         .button(18)
         .whileTrue(
             new DriveToPose(
                 drive,
-                () -> PhoenixUtil.getClosestPose(drive.getPose())
+                () -> PhoenixUtil.getClosestPose(drive.getPose(), () -> getIsLeft())
+            )
+        );
+ 
+    controller
+        .button(1)
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getY(),
+                () -> -controller.getX(),
+                () -> PhoenixUtil.returnSourceRotatedPose(drive.getPose()).getRotation()
             )
         );
 
@@ -290,6 +326,10 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     return autoChooser.get();
+  }
+
+  public boolean getIsLeft() {
+    return isLeft;
   }
 
 

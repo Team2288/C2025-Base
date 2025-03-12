@@ -72,7 +72,7 @@ public class DriveCommands {
       DoubleSupplier xSupplier,
       DoubleSupplier ySupplier,
       DoubleSupplier omegaSupplier,
-      BooleanSupplier isSlow) {
+      DoubleSupplier slowFactor) {
     return Commands.run(
         () -> {
           // Get linear velocity
@@ -86,21 +86,12 @@ public class DriveCommands {
           omega = Math.copySign(omega * omega, omega);
           ChassisSpeeds speeds;
 
-          if (isSlow.getAsBoolean()) {
-            speeds = 
+          speeds = 
               new ChassisSpeeds(
-                linearVelocity.getX() / 2 * drive.getMaxLinearSpeedMetersPerSec(),
-                linearVelocity.getY() / 2 * drive.getMaxLinearSpeedMetersPerSec(),
+                linearVelocity.getX() / slowFactor.getAsDouble() * drive.getMaxLinearSpeedMetersPerSec(),
+                linearVelocity.getY() / slowFactor.getAsDouble() * drive.getMaxLinearSpeedMetersPerSec(),
                 omega / 2 * drive.getMaxAngularSpeedRadPerSec()
               );
-          } else {
-            // Convert to field relative speeds & send command
-            speeds =
-                new ChassisSpeeds(
-                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
-                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
-                    omega * drive.getMaxAngularSpeedRadPerSec());
-          }
 
           boolean isFlipped =
               DriverStation.getAlliance().isPresent()
@@ -170,6 +161,71 @@ public class DriveCommands {
         // Reset PID controller when command starts
         .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
   }
+
+  public static Command txSupplier(
+    Drive drive,
+    DoubleSupplier xSupplier,
+    DoubleSupplier ySupplier,
+    Supplier<Rotation2d> rotationSupplier) {
+
+  // Create PID controller
+  ProfiledPIDController angleController =
+      new ProfiledPIDController(
+          ANGLE_KP,
+          0.0,
+          ANGLE_KD,
+          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+  angleController.enableContinuousInput(-Math.PI, Math.PI);
+
+  ProfiledPIDController xController =
+  new ProfiledPIDController(
+      10,
+      0.0,
+      0,
+      new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+
+  ProfiledPIDController yController =
+      new ProfiledPIDController(
+          10,
+          0.0,
+          0,
+          new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+
+  // Construct command
+  return Commands.run(
+          () -> {
+            // Get linear velocity
+            Translation2d linearVelocity =
+                getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble());
+
+            // Calculate angular speed
+            double omega =
+                angleController.calculate(
+                    drive.getRotation().getRadians(), rotationSupplier.get().getRadians());
+
+            // Convert to field relative speeds & send command
+            ChassisSpeeds speeds =
+                new ChassisSpeeds(
+                    linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                    linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                    omega);
+            boolean isFlipped =
+                DriverStation.getAlliance().isPresent()
+                    && DriverStation.getAlliance().get() == Alliance.Red;
+            speeds =
+                ChassisSpeeds.fromFieldRelativeSpeeds(
+                    speeds,
+                    isFlipped
+                        ? drive.getRotation().plus(new Rotation2d(Math.PI))
+                        : drive.getRotation());
+            drive.runVelocity(speeds);
+          },
+          drive)
+
+      // Reset PID controller when command starts
+      .beforeStarting(() -> angleController.reset(drive.getRotation().getRadians()));
+}
+
 
   /**
    * Measures the velocity feedforward constants for the drive motors.
