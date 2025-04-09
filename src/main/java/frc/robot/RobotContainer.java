@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
@@ -25,12 +26,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.FollowPathCommand;
+
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIO;
@@ -48,12 +52,20 @@ import frc.robot.subsystems.lights.Lights;
 import frc.robot.subsystems.lights.LightsIOAddressable;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.PhoenixUtil.ReefTarget;
+import frc.robot.subsystems.climber.ClimberConstants;
 import frc.robot.util.PhoenixUtil;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOTalonFX;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import frc.robot.subsystems.intake.IntakeIOTalonFX;
 import java.util.function.Supplier;
 /**
@@ -70,12 +82,13 @@ public class RobotContainer {
   private final Lights lights;
   private final Intake intake;
   private final SuperStructure superstructure;
-
+  private final Climber climber;
   // Controller
   // private final CommandJoystick controller = new CommandJoystick(0);
   private final CommandJoystick controller = new CommandJoystick(0);
   private final CommandXboxController codriver = new CommandXboxController(1);
   private boolean isLeft = false;
+  private boolean isClimbing = false;
   
 
   // Dashboard inputs
@@ -99,18 +112,16 @@ public class RobotContainer {
                 drive::addVisionMeasurement, 
                 drive::getPose,
                 new VisionIOLimelight("limelight-front", drive::getRotation)
-             //   new VisionIOPhotonVision("cameraRight", VisionConstants.robotToCameraLeft)
-               // new VisionIOPhotonVision("cameraLeft", VisionConstants.robotToCameraLeft)
+             //   new VisionIOPhotonVision("cameraRight", VisionConstants.robotToCameraRight),
+             //   new VisionIOPhotonVision("cameraLeft", VisionConstants.robotToCameraLeft)
             ); 
-        
-        /* 
-        vision = new Vision(
-            drive::addVisionMeasurement,
-            drive::getPose,
-            new VisionIO() {}
-        );
-        */
-        
+            
+        climber =
+            new Climber(
+                new ClimberIOTalonFX()
+            );
+
+        Logger.addDataReceiver(new WPILOGWriter("/media/sda1"));        
 
         elevator = 
             new Elevator(new ElevatorIOTalonFX());
@@ -142,6 +153,12 @@ public class RobotContainer {
         elevator = new Elevator(new ElevatorIO() {});
 
         intake = new Intake(new IntakeIO() {});
+                
+        climber =
+            new Climber(
+                new ClimberIO() {}
+            );
+
 
         superstructure = new SuperStructure(elevator, intake);
 
@@ -166,15 +183,24 @@ public class RobotContainer {
         intake = new Intake(new IntakeIO() {});
 
         superstructure = new SuperStructure(elevator, intake);
+        
+        climber =
+            new Climber(
+                new ClimberIO() {}
+            );
+
 
         lights = new Lights(new LightsIOAddressable(), superstructure::supplyLED);
 
         break;
     }
     NamedCommands.registerCommand("L4_Ready", superstructure.readyToScore(ReefTarget.L4));
+    NamedCommands.registerCommand("L3_Ready", superstructure.readyToScore(ReefTarget.L3));
     NamedCommands.registerCommand("Idle", superstructure.robotIdle());
     NamedCommands.registerCommand("Intake", superstructure.intake());
     NamedCommands.registerCommand("Score", new SequentialCommandGroup(superstructure.score(ReefTarget.L4), new WaitCommand(0.4)));
+    NamedCommands.registerCommand("Score_L3", new SequentialCommandGroup(superstructure.score(ReefTarget.L3), new WaitCommand(0.4)));
+
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -188,8 +214,16 @@ public class RobotContainer {
         "Drive Torque Characterization", drive.sysIDFullRoutine());
 
     autoChooser.addOption(
-        "Test Auto12", AutoBuilder.buildAuto("autotest"));
+        "2 L4 Left", AutoBuilder.buildAuto("2-L4-Left"));
 
+    autoChooser.addOption(
+        "Taxi", AutoBuilder.buildAuto("Taxi"));
+
+    autoChooser.addOption(
+        "1 L3 Mid", AutoBuilder.buildAuto("1-L3-Mid"));
+
+    autoChooser.addOption("Taxi Right", AutoBuilder.buildAuto("TaxiRight"));
+    
     autoChooser.addOption(
         "Drive SysId (Quasistatic Forward)",
         drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -256,6 +290,23 @@ public class RobotContainer {
             )
         );
 
+    controller
+        .button(2)
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getY(),
+                () -> -controller.getX(),
+                () -> new Rotation2d(0.0)
+            )
+        );
+
+    codriver
+        .b()
+        .onTrue(
+            superstructure.algaeRemove()
+        );
+
     codriver
         .a()
         .onTrue(
@@ -263,9 +314,25 @@ public class RobotContainer {
         );
 
     codriver
+        .x()    
+        .onTrue(
+            
+            new ConditionalCommand(
+                //climber.setClimberVoltage(-4),
+                climber.setPosition(0),
+                climber.setPosition(ClimberConstants.swivelClimb),
+                //climber.setClimberVoltage(4),
+                () -> getIsClimbing()
+            )
+                
+            //climber.setClimberVoltage(4)
+        );
+
+    codriver
         .y()
         .onTrue(
             superstructure.robotIdle()
+           // climber.setClimberVoltage(0)
         );
 
 
@@ -288,35 +355,6 @@ public class RobotContainer {
         .onTrue(
             superstructure.scoreStateMachine(ReefTarget.L1)
         );
-
-    // Lock to 0° when A button is held
-    /* 
-    controller
-        .button(3)
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getY(),
-                () -> -controller.getX(),
-                () -> new Rotation2d()));
-    */
-    // Switch to X pattern when X button is pressed
-    /* 
-    controller.button(3).onTrue(Commands.runOnce(drive::stopWithX, drive));
-    */
-
-    // Reset gyro to 0° when B button is pressed
-    /* 
-    controller
-        .button(5)
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
-                    drive)
-                .ignoringDisable(true));
-    */
   }
 
   /**
@@ -328,7 +366,14 @@ public class RobotContainer {
     return autoChooser.get();
   }
 
+  public boolean getIsClimbing() {
+    boolean temp = this.isClimbing;
+    this.isClimbing = !this.isClimbing;
+    return temp;
+  }
+
   public boolean getIsLeft() {
+    SmartDashboard.putBoolean("IsLeft", isLeft);
     return isLeft;
   }
 

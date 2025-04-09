@@ -131,9 +131,10 @@ public class PhoenixUtil {
       } else {
         for (int i = 0; i < poseListScoreLeft.length; i++) {
 
+          // 8.573 + (12.62 - 12.606)
           Pose2d poseRed = new Pose2d(
             new Translation2d(
-              poseListScoreRight[i].getX() + 8.57301,
+              poseListScoreRight[i].getX() + 8.587,
               poseListScoreRight[i].getY()
             ),
             poseListScoreRight[i].getRotation()
@@ -205,10 +206,10 @@ public class PhoenixUtil {
   }
 
   public static enum ReefTarget {
-        L1(0.0, 3, 15.25), 
-        L2(0.8693, 10, 9.157),
-        L3(2.31918, 10, 9.3),
-        L4(4.65, 5, 9.3);
+        L1(0.0, 3, 15.25 * 45/60), 
+        L2(0.8693, 10, 9.157 * 45/60),
+        L3(2.31918, 10, 9.3 * 45/60),
+        L4(4.65, 5, 9.3 * 45/60);
 
         public final double elevatorHeight;
         public final double outtakeSpeed;

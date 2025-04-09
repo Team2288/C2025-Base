@@ -18,7 +18,7 @@ public class LightsIOAddressable implements LightsIO {
     public LightsIOAddressable() {
         this.lights = new AddressableLED(LightsConstants.kPWMPort);
 
-        this.buffer = new AddressableLEDBuffer(66);
+        this.buffer = new AddressableLEDBuffer(75);
 
         this.usingState = null;
 
@@ -50,4 +50,12 @@ public class LightsIOAddressable implements LightsIO {
         pattern.applyTo(this.buffer);
         this.usingState = state;
     }
+
+    public void setLEDColor(LEDPattern pattern, boolean isFlashing) {
+        if (isFlashing) pattern = flashPattern(pattern);
+
+        pattern.applyTo(this.buffer);
+        this.usingState = LightStatesEnum.kDriving;
+    }
+
 }

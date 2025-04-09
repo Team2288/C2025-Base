@@ -1,6 +1,7 @@
 package frc.robot.subsystems.lights;
 import frc.robot.subsystems.lights.LightsConstants.LightStatesEnum;
 import org.littletonrobotics.junction.AutoLog;
+import edu.wpi.first.wpilibj.LEDPattern;
 
 public interface LightsIO {
     @AutoLog
@@ -12,5 +13,7 @@ public interface LightsIO {
 
     public default void setLEDPattern(LightStatesEnum state, boolean isFlashing) {}
 
+    public default void setLEDColor(LEDPattern color, boolean isFlashing) {}
+ 
     public default void setLEDData() {}
 }

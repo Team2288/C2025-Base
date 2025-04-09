@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.util.PhoenixUtil;
-// import com.playingwithfusion.TimeOfFlight;
+import com.playingwithfusion.TimeOfFlight;
 
 public class Intake extends SubsystemBase {
     private final IntakeIO io;
@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase {
     private final SysIdRoutine swivelRoutine;
     
     private DigitalInput beambreak;
-    // private TimeOfFlight tof;
+    private TimeOfFlight tof;
 
     public Intake(IntakeIO io) {
         this.io = io;
@@ -39,7 +39,7 @@ public class Intake extends SubsystemBase {
         this.intakeGoalRotPerSec = 0.0;
 
         this.beambreak = new DigitalInput(8);
-        // this.tof = new TimeOfFlight(0);
+        this.tof = new TimeOfFlight(0);
 
         swivelRoutine =
             new SysIdRoutine(
@@ -65,7 +65,7 @@ public class Intake extends SubsystemBase {
             () -> {io.swivelSetPosition(position); io.intakeSetVoltage(volts);},
             interrupted -> {
             },
-            () -> getBeambreak(),
+            () -> getTOF() < 80.0,
             this
         );
 
@@ -95,7 +95,7 @@ public class Intake extends SubsystemBase {
             interrupted -> {
 
             },
-            () -> PhoenixUtil.epsilonEquals(inputs.swivelPosition, position, 0.1),
+            () -> PhoenixUtil.epsilonEquals(inputs.swivelPosition, position, 0.13),
             this
         );
     }
@@ -159,23 +159,18 @@ public class Intake extends SubsystemBase {
     }
 
     public Command intake() {
-        return setIntakePositionAndVoltageBeambreak(IntakeConstants.intakeIntake, -8);
-             //  .until(() -> getBeambreak());
+        return setIntakePositionAndVoltageBeambreak(IntakeConstants.intakeIntake, -8)
+               .until(() -> (getTOF() < 80.0));
     }
 
-    public boolean getBeambreak(){
-        return !beambreak.get();
+    public double getTOF(){
+        return tof.getRange();
     }
-
-    // public double getTOF(){
-    //     return tof.getRange();
-    // }
-
 
     @Override
     public void periodic() {
-        // System.out.println(getTOF());
         io.updateInputs(inputs);
+       // System.out.println(getTOF());
 
         swivelConnected.set(inputs.swivelConnected);
         intakeConnected.set(inputs.intakeConnected);

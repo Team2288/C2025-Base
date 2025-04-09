@@ -23,14 +23,6 @@ public class LightsConstants {
     }
 
     public static Map<LightStatesEnum, LEDPattern> LightStates = Map.of(
-        LightStatesEnum.kDriving, LEDPattern.steps(
-                                    Map.of(0, 
-                                    Color.kDarkViolet,
-                                    0.5, 
-                                    DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue 
-                                        ? Color.kBlue 
-                                        : Color.kRed
-                                    )).scrollAtAbsoluteSpeed(MetersPerSecond.of(.3), Meters.of(1 / 60.0)), 
         LightStatesEnum.kIdle, LEDPattern.solid(Color.kPurple), // purple
         LightStatesEnum.kActing, LEDPattern.gradient(
                                     GradientType.kContinuous,

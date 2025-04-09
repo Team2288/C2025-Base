@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4MidReady"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4_Ready"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4MidScore"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4MidRetreat"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L3_Ready"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

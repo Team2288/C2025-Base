@@ -20,6 +20,11 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.pathplanner.lib.commands.FollowPathCommand;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
+
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -35,6 +40,7 @@ public class Robot extends LoggedRobot {
   private RobotContainer robotContainer;
 
   public Robot() {
+   // FollowPathCommand.warmupCommand().schedule();
     // Record metadata
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -58,7 +64,11 @@ public class Robot extends LoggedRobot {
       case REAL:
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
+
+        if (!DriverStation.isFMSAttached()) {
+          Logger.addDataReceiver(new NT4Publisher());
+        }
+
         break;
 
       case SIM:
@@ -87,17 +97,17 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     // Switch thread to high priority to improve loop timing
-    Threads.setCurrentThreadPriority(true, 99);
+    //Threads.setCurrentThreadPriority(true, 99);
 
     // Runs the Scheduler. This is responsible for polling buttons, adding
     // newly-scheduled commands, running already-scheduled commands, removing
     // finished or interrupted commands, and running subsystem periodic() methods.
     // This must be called from the robot's periodic block in order for anything in
     // the Command-based framework to work.
-    CommandScheduler.getInstance().run();
+    CommandScheduler.getInstance().run(); 
 
     // Return to normal thread priority
-    Threads.setCurrentThreadPriority(false, 10);
+    //Threads.setCurrentThreadPriority(false, 10);
   }
 
   /** This function is called once when the robot is disabled. */
@@ -143,7 +153,7 @@ public class Robot extends LoggedRobot {
   }
 
   /** This function is called once when test mode is enabled. */
-  @Override
+  @Override  
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();

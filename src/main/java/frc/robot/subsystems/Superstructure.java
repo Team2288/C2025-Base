@@ -12,6 +12,7 @@ import frc.robot.subsystems.lights.Lights;
 import org.littletonrobotics.junction.AutoLogOutput;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public class SuperStructure {
     Elevator elevator;
@@ -74,6 +75,19 @@ public class SuperStructure {
                });
     }
 
+    
+    public Command algaeRemove() {
+        return new SequentialCommandGroup(
+            intake.setIntakePosition(IntakeConstants.intakeIntake),
+            this.elevator.setElevatorPosition(ReefTarget.L2.elevatorHeight),
+            new ParallelCommandGroup(
+                intake.setIntakePositionAndVoltageBeambreak(16, 8),
+                new WaitCommand(0.5),
+                elevator.setElevatorPosition(ReefTarget.L3.elevatorHeight)
+            )
+        ) ;
+    }
+
     public Command robotIdle() {
         return new SequentialCommandGroup(
             this.intake.setIntakePositionAndVoltageNoBeambreak(IntakeConstants.intakeIdle, -1),
@@ -89,11 +103,10 @@ public class SuperStructure {
 
     public Command intake() {
         return intake.intake()
-               .beforeStarting(() -> this.state = SuperState.INTAKING);
-              // .andThen(new WaitCommand(0.1))
-              // .andThen(robotIdle());
+               .beforeStarting(() -> this.state = SuperState.INTAKING)
+               .andThen(new WaitCommand(0.1))
+               .andThen(robotIdle());
     }
-
     
     public Command scoreStateMachine(ReefTarget target) {
         return new ConditionalCommand(

@@ -1,7 +1,16 @@
 package frc.robot.subsystems.lights;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
+import java.util.Map;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.lights.LightsConstants.LightStatesEnum;
@@ -23,7 +32,6 @@ public class Lights extends SubsystemBase {
         for (int i = 0; i < supplier.length; i++) { // populate array
             lightsSuppliers[i] = supplier[i];
         }
-
         setDefaultCommand(runPattern(LightStatesEnum.kIdle));
     }
 
@@ -71,7 +79,27 @@ public class Lights extends SubsystemBase {
         }
 
         if (inputs.currentState != usingState) {
-            runPattern(usingState).schedule();
+            if (usingState == LightStatesEnum.kDriving) {
+                var alliance = DriverStation.getAlliance();
+
+                if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+                    runColor(LEDPattern.steps(
+                        Map.of(0, 
+                        Color.kDarkViolet,
+                        0.5, 
+                        Color.kRed
+                        )).scrollAtAbsoluteSpeed(MetersPerSecond.of(.3), Meters.of(1 / 60.0))).schedule();
+                } else {
+                    runColor(LEDPattern.steps(
+                        Map.of(0, 
+                        Color.kDarkViolet,
+                        0.5, 
+                        Color.kBlue
+                        )).scrollAtAbsoluteSpeed(MetersPerSecond.of(.3), Meters.of(1 / 60.0))).schedule();
+                }
+            } else {
+                runPattern(usingState).schedule();
+            }
         }
 
         io.setLEDData();
@@ -83,6 +111,14 @@ public class Lights extends SubsystemBase {
             .andThen(run(() -> io.setLEDPattern(state, false)))
             .ignoringDisable(true);
     }
+
+    public Command runColor(LEDPattern color) {
+        return run(
+            () -> io.setLEDColor(color, true)).withTimeout(1.0) // flash for 1 second during a state change
+            .andThen(run(() -> io.setLEDColor(color, false)))
+            .ignoringDisable(true);
+    }
+
 
     public void populateLightSuppliers(){
         for (int i = 0; i < lightsSuppliers.length; i++) { // populate array

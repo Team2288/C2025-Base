@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start-Lineup.0"
+            "pathName": "2-L4-Left-Start"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Score"
+            "pathName": "2-L4-Left-Lineup"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Retreat"
+            "pathName": "2-L4-Left-Retreat"
           }
         },
         {
@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Intake-Lineup.0"
+            "pathName": "2-L4-Left-Intake"
           }
         },
         {
@@ -55,7 +55,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Score-Lineup.0"
+            "pathName": "2-L4-Left-R"
           }
         },
         {
@@ -67,7 +67,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Score-2.0"
+            "pathName": "2-L4-Left-LineupR"
           }
         },
         {
@@ -79,7 +79,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Retreat-2.0"
+            "pathName": "2-L4-Left-RetreatR"
           }
         },
         {
